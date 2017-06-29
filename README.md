@@ -1,11 +1,8 @@
 # apollo-fetch
 
-`apollo-fetch` is a lightweight fetch for GraphQL requests that supports the middleware and afterware to modify the request and response.
+`apollo-fetch` is a lightweight fetch for GraphQL requests that supports the middleware and afterware to modify requests and responses.
 
-By default, `apollo-fetch` uses `isomorphic-fetch` and provides the option of using a custom fetch function.
-
-In addition, `apollo-fetch` supports passing a context to the server and receiving a context.
-This context can be used by the middleware and afterware.
+By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of using a custom fetch function.
 
 # Usage
 
@@ -24,13 +21,14 @@ const query = `
     }
   }
 `
+const apolloFetch = createApolloFetch({ uri });
 
-createApolloFetch({uri})({query})
+apolloFetch({query})
 .then((result) => {
-  // GraphQL data, GraphQL errors, GraphQL extensions, and possible context from the server
-  const {data, error, extensions, context} = result;
+  // GraphQL data, GraphQL errors and GraphQL extensions
+  const { data, error, extensions } = result;
 })
-.catch((error) => {
+.catch(error => {
   //respond to a network error
 })
 ```
@@ -41,7 +39,7 @@ Middleware has access to the GraphQL query and the options passed to fetch.
 ```js
 import { createApolloFetch } from 'apollo-fetch'
 
-const uri = 'example.com/graphql';
+const uri = 'api.githunt.com/graphql';
 
 const query = `
   query sampleMutation(id: ID!) {
@@ -54,7 +52,7 @@ const query = `
 
 const apolloFetch = createApolloFetch({uri});
 
-apolloFetch.use({applyMiddleware: ({request, options}, next) => {
+apolloFetch.use({applyMiddleware: ({ request, options }, next) => {
   if (!options.headers) {
     options.headers = {};  // Create the headers object if needed.
   }
@@ -63,12 +61,12 @@ apolloFetch.use({applyMiddleware: ({request, options}, next) => {
   next();
 }});
 
-apolloFetch({query})
-.then((result) => {
+apolloFetch({ query })
+.then(result => {
   // GraphQL data, errors, and extensions plus context from the server
   const {data, error, extensions context} = result;
 })
-.catch((error) => {
+.catch(error => {
   //respond to a network error
 })
 ```
@@ -81,7 +79,7 @@ import { createApolloFetch } from 'apollo-fetch'
 
 const uri = 'example.com/graphql';
 
-const apolloFetch = createApolloFetch({uri});
+const apolloFetch = createApolloFetch({ uri });
 
 apolloFetch.useAfter({
   applyAfterware: ({ response }, next) => {
@@ -92,12 +90,12 @@ apolloFetch.useAfter({
   }
 });
 
-apolloFetch({query})
-.then((result) => {
-  // GraphQL data, errors, and extensions plus context from the server
-  const {data, error, extensions context} = result;
+apolloFetch({ query })
+.then(result => {
+  // GraphQL data, errors, and extensions from the server
+  const { data, error, extensions } = result;
 })
-.catch((error) => {
+.catch(error => {
   //respond to a network error
 })
 ```
@@ -116,7 +114,7 @@ apolloFetch.use([exampleWare1])
 
 # API
 
-`createApolloFetch` is a factory for `ApolloFetch`, a fetch with middleware and afterware capabilities.
+`createApolloFetch` is a factory for `ApolloFetch`, a fetch function with middleware and afterware capabilities.
 
 ```js
 createApolloFetch(options: FetchOptions): ApolloFetch
@@ -189,7 +187,7 @@ ResponseAndOptions {
 }
 ```
 
-`ParsedResponse` adds `raw`, the body from the .text() call on the fetch result, and `parsed`, the parsed JSON from `raw`, onto the regular Response from the fetch call.
+`ParsedResponse` adds `raw` (the body from the `.text()` call) to the fetch result, and `parsed` (the parsed JSON from `raw`) to the regular Response from the fetch call.
 
 ```js
 ParsedResponse extends Response {
@@ -198,7 +196,7 @@ ParsedResponse extends Response {
 }
 ```
 
-The error returned from a call to `ApolloFetch` is a normal error that contains the response, the raw response from .text(), a possible parse error.
+Errors returned from a call to `ApolloFetch` are normal errors that contain the parsed response, the raw response from .text(), and a possible parse error.
 
 ```js
 FetchError extends Error {
