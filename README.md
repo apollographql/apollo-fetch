@@ -1,5 +1,7 @@
 # apollo-fetch
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/apollographql/apollo-fetch.svg)](https://greenkeeper.io/)
+
 `apollo-fetch` is a lightweight fetch for GraphQL requests that supports the middleware and afterware to modify the request and response.
 
 By default, `apollo-fetch` uses `isomorphic-fetch` and provides the option of using a custom fetch function.
