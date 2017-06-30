@@ -155,14 +155,12 @@ describe('apollo-fetch', () => {
     });
   });
 
-  const callAndCheckFetch = (uri, fetcher, numCalls, done) => {
+  const callAndCheckFetch = (uri, fetcher) => {
     const result = fetcher({query: print(sampleQuery)});
 
-    result.then((response) => {
+    return result.then((response) => {
       //correct response
       assert.deepEqual(response, JSON.parse(data));
-      //single call
-      assert.deepEqual(fetchMock.calls(uri).length, numCalls);
 
       assert.deepEqual(fetchMock.lastCall(uri)[0], uri);
       const options = fetchMock.lastCall(uri)[1];
@@ -170,24 +168,21 @@ describe('apollo-fetch', () => {
       assert.deepEqual(options.method, 'POST');
       assert.deepEqual(options.headers, {Accept: '*/*', 'Content-Type': 'application/json'});
       assert.deepEqual(body.query, print(sampleQuery));
-      done();
     });
 
   };
 
-  it('should call fetch with correct arguments and result', (done) => {
+  it('should call fetch with correct arguments and result', () => {
     const uri = 'test';
     const fetcher = createApolloFetch({uri});
-    callAndCheckFetch(uri, fetcher, 1, done);
+    return callAndCheckFetch(uri, fetcher);
   });
 
-  it('should make two successful requests', (done) => {
+  it('should make two successful requests', () => {
     const uri = 'test';
     const fetcher = createApolloFetch({uri});
-    const fetchWrapper = (callNumber, continuation) => callAndCheckFetch(uri, fetcher, callNumber, continuation);
-
-    fetchWrapper(1, () => fetchWrapper(2, done));
-
+    return callAndCheckFetch(uri, fetcher)
+      .then(() => callAndCheckFetch(uri, fetcher));
   });
 
   it('should pass an error onto the Promise', () => {

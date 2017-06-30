@@ -71,11 +71,11 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     try {
       body = JSON.stringify(request);
     } catch (e) {
-      throw new Error(`Network request failed with status ${response.status} - "${response.statusText}"`);
+      throw new Error(`Network request failed. Payload is not serizable: ${e.message}`);
     }
 
     const opts = {
-      body: body,
+      body,
       method: 'POST',
       ...options,
       headers: {
@@ -121,8 +121,8 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
             //pass parsed raw response onto afterware
             return <ParsedResponse>{ ...response, raw, parsed: null };
           }
-        })
-        .catch( error => throwHttpError(response, error)),
+        }),
+        //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
       )
       .then(response => applyAfterwares({
         response,
