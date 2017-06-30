@@ -167,3 +167,5 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
   return apolloFetch as ApolloFetch;
 }
 
+const apolloFetch = createApolloFetch();
+export { apolloFetch };
