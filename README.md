@@ -113,6 +113,15 @@ apolloFetch.use([exampleWare1])
   .use([exampleWare5]);
 ```
 
+`apolloFetch` is an alias for an empty call to `createApolloFetch`
+
+```js
+import { apolloFetch } from `apollo-fetch`;
+
+//fetches a query from /graphql
+apolloFetch({ query }).then(...).catch(...)
+```
+
 
 # API
 
