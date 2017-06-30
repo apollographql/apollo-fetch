@@ -21,7 +21,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
   const applyMiddlewares = (requestAndOptions: RequestAndOptions): Promise<RequestAndOptions> => {
     return new Promise((resolve, reject) => {
       const { request, options } = requestAndOptions;
-      const queue = (funcs: MiddlewareInterface[], scope: any) => {
+      const buildMiddlewareStack = (funcs: MiddlewareInterface[], scope: any) => {
         const next = () => {
           if (funcs.length > 0) {
             const f = funcs.shift();
@@ -38,7 +38,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
         next();
       };
 
-      queue([..._middlewares], this);
+      buildMiddlewareStack([..._middlewares], this);
     });
   };
 
@@ -47,7 +47,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     return new Promise((resolve, reject) => {
       // Declare responseObject so that afterware can mutate it.
       const responseObject = {response, options};
-      const queue = (funcs: AfterwareInterface[], scope: any) => {
+      const buildAfterwareStack = (funcs: AfterwareInterface[], scope: any) => {
         const next = () => {
           if (funcs.length > 0) {
             const f = funcs.shift();
@@ -62,19 +62,26 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
       };
 
       // iterate through afterwares using next callback
-      queue([..._afterwares], this);
+      buildAfterwareStack([..._afterwares], this);
     });
   };
 
-  const callFetch = ({request, options}) => {
+  const callFetch = ({ request, options }) => {
+    let body;
+    try {
+      body = JSON.stringify(request);
+    } catch (e) {
+      throw new Error(`Network request failed with status ${response.status} - "${response.statusText}"`);
+    }
+
     const opts = {
-      body: JSON.stringify(request),
+      body: body,
       method: 'POST',
       ...options,
       headers: {
         Accept: '*/*',
         'Content-Type': 'application/json',
-        ...(options.headers as { [headerName: string]: string }),
+        ...(options.headers || []),
       },
     };
     return customFetch ? customFetch(_uri, opts) : fetch(_uri, opts);
@@ -94,7 +101,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     throw httpError;
   };
 
-  let apolloFetch: ApolloFetch = <ApolloFetch>Object.assign(
+  const apolloFetch: ApolloFetch = <ApolloFetch>Object.assign(
     function (request: GraphQLRequest): Promise<FetchResult> {
       const options = {};
       let parseError;
@@ -103,8 +110,8 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
         request,
         options,
       })
-      .then(callFetch)
-      .then((response) => response.text().then((raw) => {
+      .then( callFetch )
+      .then( response => response.text().then( raw => {
           try {
             const parsed = JSON.parse(raw);
             return <ParsedResponse>{ ...response, raw, parsed };
@@ -115,7 +122,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
             return <ParsedResponse>{ ...response, raw, parsed: null };
           }
         })
-        .catch((error) => throwHttpError(response, error)),
+        .catch( error => throwHttpError(response, error)),
       )
       .then(response => applyAfterwares({
         response,
@@ -131,7 +138,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     },
     {
       use: (middlewares: MiddlewareInterface[]) => {
-        middlewares.map((middleware) => {
+        middlewares.map( middleware => {
           if (typeof middleware.applyMiddleware === 'function') {
             _middlewares.push(middleware);
           } else {
@@ -142,7 +149,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
         return apolloFetch;
       },
       useAfter: (afterwares: AfterwareInterface[]) => {
-        afterwares.map((afterware) => {
+        afterwares.map( afterware => {
           if (typeof afterware.applyAfterware === 'function') {
             _afterwares.push(afterware);
           } else {

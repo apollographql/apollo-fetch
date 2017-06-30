@@ -1,17 +1,17 @@
 # apollo-fetch
 
-`apollo-fetch` is a lightweight fetch for GraphQL requests that supports the middleware and afterware to modify requests and responses.
+`apollo-fetch` is a lightweight client for GraphQL requests that supports middleware and afterware that modify requests and responses.
 
 By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of using a custom fetch function.
 
 # Usage
 
-Simple GraphQL query
+Simple GraphQL query:
 
 ```js
 import { createApolloFetch } from 'apollo-fetch'
 
-const uri = 'example.com/graphql';
+const uri = 'http://api.githunt.com/graphql';
 
 const query = `
   query sampleQuery(id: ID!) {
@@ -23,8 +23,8 @@ const query = `
 `
 const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch({query})
-.then((result) => {
+apolloFetch({ query })
+.then( result => {
   // GraphQL data, GraphQL errors and GraphQL extensions
   const { data, error, extensions } = result;
 })
@@ -39,7 +39,7 @@ Middleware has access to the GraphQL query and the options passed to fetch.
 ```js
 import { createApolloFetch } from 'apollo-fetch'
 
-const uri = 'api.githunt.com/graphql';
+const uri = 'http://api.githunt.com/graphql';
 
 const query = `
   query sampleMutation(id: ID!) {
@@ -50,21 +50,23 @@ const query = `
   }
 `
 
-const apolloFetch = createApolloFetch({uri});
+const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch.use({applyMiddleware: ({ request, options }, next) => {
-  if (!options.headers) {
-    options.headers = {};  // Create the headers object if needed.
-  }
-  options.headers['authorization'] = 'created token';
+apolloFetch.use([{
+  applyMiddleware: ({ request, options }, next) => {
+    if (!options.headers) {
+      options.headers = {};  // Create the headers object if needed.
+    }
+    options.headers['authorization'] = 'created token';
 
-  next();
-}});
+    next();
+  },
+}]);
 
 apolloFetch({ query })
 .then(result => {
-  // GraphQL data, errors, and extensions plus context from the server
-  const {data, error, extensions context} = result;
+  // GraphQL data, errors, and extensions
+  const { data, error, extensions } = result;
 })
 .catch(error => {
   //respond to a network error
@@ -77,18 +79,18 @@ The afterware has access to the raw reponse always and parsed response when the 
 ```js
 import { createApolloFetch } from 'apollo-fetch'
 
-const uri = 'example.com/graphql';
+const uri = 'http://api.githunt.com/graphql';
 
 const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch.useAfter({
+apolloFetch.useAfter([{
   applyAfterware: ({ response }, next) => {
     if (response.status === 401) {
       logout();
     }
     next();
-  }
-});
+  },
+}]);
 
 apolloFetch({ query })
 .then(result => {
