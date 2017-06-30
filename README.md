@@ -6,6 +6,74 @@ By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of us
 
 # Usage
 
+To create a fetch function capable of supporting middleware and afterware, use `createApolloFetch`:
+
+```js
+import { createApolloFetch } from 'apollo-fetch'
+
+const uri = 'http://api.githunt.com/graphql';
+const apolloFetch = createApolloFetch({ uri });
+```
+
+To execute the fetch function, call `apolloFetch` directly in the following way:
+
+```js
+apolloFetch({ query, variables, operationName }) //all apolloFetch arguments are optional
+.then( result => {
+  const { data, error, extensions } = result;
+  //GraphQL errors and extensions are optional
+})
+.catch( error => {
+  //respond to a network error
+})
+```
+
+Middleware and Afterware are added with `use` and `useAfter` directly to `apolloFetch`:
+
+```js
+const apolloFetch = createApolloFetch();
+
+const middleware = {
+  applyMiddleware: ({ request, options }) => { ... },
+};
+
+const afterware = {
+  applyAfterware: ({ response, options }) => { ... },
+};
+
+apolloFetch.use([ middleware ]);
+apolloFetch.useAfter([ afterware ]);
+```
+
+Middleware and Afterware can be chained together in any order:
+
+```js
+const apolloFetch = createApolloFetch();
+apolloFetch.use([ middleware1 ])
+  .use([ middleware2 ])
+  .useAfter([ afterware1, afterware2 ])
+  .useAfter([ afterware3 ])
+  .use([ middleware3 ]);
+```
+
+The `apolloFetch` from `apollo-fetch` is an alias for an empty call to `createApolloFetch`
+
+```js
+import { apolloFetch } from `apollo-fetch`;
+
+//fetches a query from /graphql
+apolloFetch({ query }).then(...).catch(...);
+```
+
+For mocking and other fetching behavior, you may pass a fetch into `createApolloFetch`:
+
+```js
+const customFetch = createFileFetch();
+const apolloFetch = createApolloFetch({ customFetch });
+```
+
+# Examples
+
 Simple GraphQL query:
 
 ```js
@@ -23,21 +91,14 @@ const query = `
 `
 const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch({ query })
-.then( result => {
-  // GraphQL data, GraphQL errors and GraphQL extensions
-  const { data, error, extensions } = result;
-})
-.catch(error => {
-  //respond to a network error
-})
+apolloFetch({ query }).then(...).catch(...);
 ```
 
 Simple GraphQL mutation with authentication middleware.
 Middleware has access to the GraphQL query and the options passed to fetch.
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
@@ -48,7 +109,11 @@ const query = `
       name
     }
   }
-`
+`;
+
+const variables = {
+  id: 1,
+};
 
 const apolloFetch = createApolloFetch({ uri });
 
@@ -63,14 +128,7 @@ apolloFetch.use([{
   },
 }]);
 
-apolloFetch({ query })
-.then(result => {
-  // GraphQL data, errors, and extensions
-  const { data, error, extensions } = result;
-})
-.catch(error => {
-  //respond to a network error
-})
+apolloFetch({ query, variables }).then(...).catch(...);
 ```
 
 Afterware to check the response status and logout on a 401.
@@ -92,34 +150,7 @@ apolloFetch.useAfter([{
   },
 }]);
 
-apolloFetch({ query })
-.then(result => {
-  // GraphQL data, errors, and extensions from the server
-  const { data, error, extensions } = result;
-})
-.catch(error => {
-  //respond to a network error
-})
-```
-
-Middleware and Afterware can be chained together in any order:
-
-```js
-const apolloFetch = createApolloFetch();
-apolloFetch.use([exampleWare1])
-  .use([exampleWare2])
-  .useAfter([exampleWare3])
-  .useAfter([exampleWare4])
-  .use([exampleWare5]);
-```
-
-`apolloFetch` is an alias for an empty call to `createApolloFetch`
-
-```js
-import { apolloFetch } from `apollo-fetch`;
-
-//fetches a query from /graphql
-apolloFetch({ query }).then(...).catch(...)
+apolloFetch(...).then(...).catch(...);
 ```
 
 
