@@ -222,8 +222,8 @@ const uri = 'http://api.githunt.com/graphql';
 const apolloFetch = createApolloFetch({ uri });
 
 const networkInterface = {
-  request: (req) => apolloFetch({...req, query: print(req.query)})
-}
+  query: (req) => apolloFetch({...req, query: print(req.query)}),
+};
 
 const client = new ApolloClient({
   networkInterface,
