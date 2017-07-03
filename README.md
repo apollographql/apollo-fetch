@@ -1,8 +1,18 @@
-# apollo-fetch
+# apollo-fetch [![npm version](https://badge.fury.io/js/apollo-fetch.svg)](https://badge.fury.io/js/apollo-fetch) [![Get on Slack](https://img.shields.io/badge/slack-join-orange.svg)](http://www.apollostack.com/#slack)
+
 
 `apollo-fetch` is a lightweight client for GraphQL requests that supports middleware and afterware that modify requests and responses.
 
 By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of using a custom fetch function.
+
+# Installation
+
+```
+npm install apollo-fetch --save
+```
+
+To use `apollo-fetch` in a web browser or mobile app, you'll need a build system capable of loading NPM packages on the client.
+Some common choices include Browserify, Webpack, and Meteor +1.3.
 
 # Usage
 
@@ -33,28 +43,23 @@ Middleware and Afterware are added with `use` and `useAfter` directly to `apollo
 ```js
 const apolloFetch = createApolloFetch();
 
-const middleware = {
-  applyMiddleware: ({ request, options }) => { ... },
-};
+const middleware = ({ request, options }, next) => { ... next(); };
 
-const afterware = {
-  applyAfterware: ({ response, options }) => { ... },
-};
+const afterware = ({ response, options }, next) => { ... next(); };
 
-apolloFetch.use([ middleware ]);
-apolloFetch.useAfter([ afterware ]);
+apolloFetch.use(middleware);
+apolloFetch.useAfter(afterware);
 ```
 
 Middleware and Afterware can be chained together in any order:
 
 ```js
 const apolloFetch = createApolloFetch();
-apolloFetch
-  .use([middleware1])
-  .use([middleware2])
-  .useAfter([afterware1, afterware2])
-  .useAfter([afterware3])
-  .use([middleware3]);
+apolloFetch.use(middleware1)
+  .use(middleware2)
+  .useAfter(afterware1)
+  .useAfter(afterware2)
+  .use(middleware3);
 ```
 
 The `apolloFetch` from `apollo-fetch` is an alias for an empty call to `createApolloFetch`
@@ -75,7 +80,7 @@ const apolloFetch = createApolloFetch({ customFetch });
 
 # Examples
 
-Simple GraphQL query:
+### Simple GraphQL Query
 
 ```js
 import { createApolloFetch } from 'apollo-fetch'
@@ -83,10 +88,9 @@ import { createApolloFetch } from 'apollo-fetch'
 const uri = 'http://api.githunt.com/graphql';
 
 const query = `
-  query sampleQuery(id: ID!) {
-    sample(id: $id) {
-      id,
-      name
+  query CurrentUser {
+    currentUser {
+      login,
     }
   }
 `
@@ -95,7 +99,34 @@ const apolloFetch = createApolloFetch({ uri });
 apolloFetch({ query }).then(...).catch(...);
 ```
 
-Simple GraphQL mutation with authentication middleware.
+### Simple GraphQL Mutation with Variables
+
+```js
+import { createApolloFetch } from 'apollo-fetch'
+
+const uri = 'http://api.githunt.com/graphql';
+
+const query = `
+  mutation SubmitRepo ($repoFullName: String!) {
+    submitRepository (repoFullName: $repoFullName) {
+      id,
+      score,
+    }
+  }
+`;
+
+const variables = {
+  repoFullName: 'apollographql/apollo-fetch',
+};
+
+const apolloFetch = createApolloFetch({ uri });
+
+apolloFetch({ query, variables }).then(...).catch(...);
+```
+
+### Middleware
+
+A GraphQL mutation with authentication middleware.
 Middleware has access to the GraphQL query and the options passed to fetch.
 
 ```js
@@ -103,34 +134,21 @@ import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
-const query = `
-  query sampleMutation(id: ID!) {
-    addSample(id: $id) {
-      id,
-      name
-    }
-  }
-`;
-
-const variables = {
-  id: 1,
-};
-
 const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch.use([{
-  applyMiddleware: ({ request, options }, next) => {
-    if (!options.headers) {
-      options.headers = {};  // Create the headers object if needed.
-    }
-    options.headers['authorization'] = 'created token';
+apolloFetch.use(({ request, options }, next) => {
+  if (!options.headers) {
+    options.headers = {};  // Create the headers object if needed.
+  }
+  options.headers['authorization'] = 'created token';
 
-    next();
-  },
-}]);
+  next();
+});
 
-apolloFetch({ query, variables }).then(...).catch(...);
+apolloFetch(...).then(...).catch(...);
 ```
+
+### Afterware
 
 Afterware to check the response status and logout on a 401.
 The afterware has access to the raw reponse always and parsed response when the data is proper JSON.
@@ -142,18 +160,50 @@ const uri = 'http://api.githunt.com/graphql';
 
 const apolloFetch = createApolloFetch({ uri });
 
-apolloFetch.useAfter([{
-  applyAfterware: ({ response }, next) => {
-    if (response.status === 401) {
-      logout();
-    }
-    next();
-  },
-}]);
+apolloFetch.useAfter(({ response }, next) => {
+  if (response.status === 401) {
+    logout();
+  }
+  next();
+});
 
 apolloFetch(...).then(...).catch(...);
 ```
 
+### Error Handling
+
+All responses are passed to the afterware regardless of the http status code.
+Network errors, `FetchError`, are thrown after the afterware is run and if no parsed response is received.
+
+This example shows an afterware that can receive a 401 with an unparsable response and return a valid `FetchResult`.
+Currently all other status codes that have an uparsable response would throw an error.
+This means if a server returns a parsable GraphQL result on a 403 for example, the result would be passed to `then` without error.
+Errors in Middleware and Afterware are propagated without modification.
+
+```js
+import { createApolloFetch } from 'apollo-fetch'
+
+const uri = 'http://api.githunt.com/graphql';
+
+const apolloFetch = createApolloFetch({ uri });
+
+apolloFetch.useAfter(({ response }, next) => {
+  //response.raw will be a non-null string
+  //response.parsed may be a FetchResult or undefined
+
+  if (response.status === 401 && !response.parsed) {
+    //set parsed response to valid FetchResult
+    response.parsed = {
+      data: { user: null },
+    };
+  }
+
+  next();
+});
+
+//Here catch() receives all responses with unparsable data
+apolloFetch(...).then(...).catch(...);
+```
 
 # API
 
@@ -166,7 +216,8 @@ FetchOptions {
   uri?: string;
   customFetch?: (request: RequestInfo, init: RequestInit) => Promise<Response>;
 }
-/* defaults:
+/*
+ * defaults:
  * uri = '/graphql'
  * customFetch = fetch from isomorphic-fetch
  */
@@ -177,19 +228,19 @@ FetchOptions {
 ```js
 ApolloFetch {
   (operation: GraphQLRequest): Promise<FetchResult>;
-  use: (middlewares: MiddlewareInterface[]) => ApolloFetch;
-  useAfter: (afterwares: AfterwareInterface[]) => ApolloFetch;
+  use: (middlewares: MiddlewareInterface) => ApolloFetch;
+  useAfter: (afterwares: AfterwareInterface) => ApolloFetch;
 }
 ```
 
-`GraphQLRequest` is the argument to an `ApolloFetch` call
+`GraphQLRequest` is the argument to an `ApolloFetch` call.
+`query` is optional to support persistent queries based on only an `operationName`.
 
 ```js
 GraphQLRequest {
   query?: string;
   variables?: object;
   operationName?: string;
-  context?: object;
 }
 ```
 
@@ -200,16 +251,13 @@ FetchResult {
   data: any;
   errors?: any;
   extensions?: any;
-  context?: object;
 }
 ```
 
 Middleware used by `ApolloFetch`
 
 ```js
-MiddlewareInterface {
-  applyMiddleware(request: RequestAndOptions, next: Function): void;
-}
+MiddlewareInterface: (request: RequestAndOptions, next: Function) => void
 
 RequestAndOptions {
   request: GraphQLRequest;
@@ -220,9 +268,7 @@ RequestAndOptions {
 Afterware used by `ApolloFetch`
 
 ```js
-AfterwareInterface {
-  applyAfterware(response: ResponseAndOptions, next: Function): any;
-}
+AfterwareInterface: (response: ResponseAndOptions, next: Function) => void
 
 ResponseAndOptions {
   response: ParsedResponse;
@@ -230,7 +276,7 @@ ResponseAndOptions {
 }
 ```
 
-`ParsedResponse` adds `raw` (the body from the `.text()` call) to the fetch result, and `parsed` (the parsed JSON from `raw`) to the regular Response from the fetch call.
+`ParsedResponse` adds `raw` (the body from the `.text()` call) to the fetch result, and `parsed` (the parsed JSON from `raw`) to the fetch's standard [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
 
 ```js
 ParsedResponse extends Response {
@@ -239,11 +285,14 @@ ParsedResponse extends Response {
 }
 ```
 
-Errors returned from a call to `ApolloFetch` are normal errors that contain the parsed response, the raw response from .text(), and a possible parse error.
+A `FetchError` is returned from a failed call to `ApolloFetch`
+is standard [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) that contains the response and a possible parse error.
+The `parseError` is generated when the raw response is not valid JSON (when `JSON.parse()` throws) and the Afterware does not add an object to the response's `parsed` property.
+Errors in Middleware and Afterware are propagated without modification.
 
 ```js
 FetchError extends Error {
   response: ParsedResponse;
-  raw: string;
   parseError?: Error;
 }
+```

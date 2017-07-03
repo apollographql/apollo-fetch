@@ -11,7 +11,6 @@ import {
 } from '../src/apollo-fetch';
 import {
   RequestAndOptions,
-  ResponseAndOptions,
   FetchResult,
 } from '../src/types';
 
@@ -32,11 +31,19 @@ describe('apollo-fetch', () => {
   const data = JSON.stringify({data: { hello: 'world', uri: '/graphql' }});
   const alternateData = JSON.stringify({data: { hello: 'alternate world', uri: 'alternate' }});
   const unparsableData = 'raw string';
+  const unauthorizedData = {
+    data: {
+      user: null,
+    },
+  };
+
   const mockError = { throws: new TypeError('mock me') };
+
   const swapiUrl = 'http://graphql-swapi.test/';
   const missingUrl = 'http://does-not-exist.test/';
 
   const unauthorizedUrl = 'http://unauthorized.test/';
+  const forbiddenUrl = 'http://forbidden.test/';
   const serviceUnavailableUrl = 'http://service-unavailable.test/';
 
   const simpleQueryWithNoVars = gql`
@@ -118,6 +125,8 @@ describe('apollo-fetch', () => {
     fetchMock.post('error', mockError);
     fetchMock.post('test', data);
 
+    fetchMock.post(unauthorizedUrl, unauthorizedData);
+
     fetchMock.post(swapiUrl, (url, opts) => {
       const { query, variables } = JSON.parse((opts as RequestInit).body!.toString());
 
@@ -140,7 +149,7 @@ describe('apollo-fetch', () => {
       throw new Error('Network error');
     });
 
-    fetchMock.post(unauthorizedUrl, 403);
+    fetchMock.post(forbiddenUrl, 403);
     fetchMock.post(serviceUnavailableUrl, 503);
   });
 
@@ -197,7 +206,7 @@ describe('apollo-fetch', () => {
   });
 
   it('should catch on a network error', () => {
-    const fetcher = createApolloFetch({uri: unauthorizedUrl});
+    const fetcher = createApolloFetch({uri: forbiddenUrl});
     const result = fetcher({query: print(sampleQuery)});
     return result.then(expect.fail)
       .catch((error) => {
@@ -214,9 +223,26 @@ describe('apollo-fetch', () => {
       .catch((error) => {
         assert.deepEqual(error.message, 'Network request failed to return valid JSON');
         assert.isDefined(error.response);
-        assert.isDefined(error.raw);
-        assert.deepEqual(error.raw, unparsableData);
+        assert.deepEqual(error.response.raw, unparsableData);
       });
+  });
+
+  it('should pass the parsed response if valid regardless of the status', () => {
+    const fetcher = createApolloFetch({
+      uri: unauthorizedUrl,
+      customFetch: () => new Promise((resolve, reject) => {
+        const init = {
+          status: 401,
+          statusText: 'Unauthorized',
+        };
+        const body = JSON.stringify(unauthorizedData);
+        resolve(new Response(body, init));
+      }),
+    });
+
+    return fetcher({query: print(sampleQuery)}).then((result) => {
+        assert.deepEqual(result.data, unauthorizedData.data);
+    });
   });
 
   describe('apolloFetch wrapper', () => {
@@ -230,20 +256,37 @@ describe('apollo-fetch', () => {
   });
 
   describe('middleware', () => {
-    it('should throw an error if appyMiddleware function is missing', () => {
+    it('should throw an error if middleware is not a function', () => {
       const malWare: any = {};
       const apolloFetch = createApolloFetch({ uri: '/graphql' });
 
       try {
-        apolloFetch.use([malWare]);
+        apolloFetch.use(malWare);
         expect.fail();
       } catch (error) {
         assert.equal(
           error.message,
-          'Middleware must implement the applyMiddleware function',
+          'Middleware must be a function',
         );
       }
 
+    });
+
+    it('should return errors thrown in middlewares', () => {
+      const apolloFetch = createApolloFetch({ uri: swapiUrl });
+      apolloFetch.use(() => { throw Error('Middleware error'); });
+
+      const simpleRequest = {
+        query: print(simpleQueryWithNoVars),
+        variables: {},
+        debugName: 'People query',
+      };
+
+      return assert.isRejected(
+        apolloFetch(simpleRequest),
+        Error,
+        'Middleware error',
+      );
     });
 
     it('can alter the request variables', () => {
@@ -252,7 +295,7 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: swapiUrl });
-      swapi.use([testWare1]);
+      swapi.use(testWare1);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(simpleQueryWithVar),
@@ -272,7 +315,7 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: swapiUrl });
-      swapi.use([testWare1]);
+      swapi.use(testWare1);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(simpleQueryWithNoVars),
@@ -291,7 +334,7 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.use([testWare1]);
+      swapi.use(testWare1);
       const simpleRequest = {
         query: print(simpleQueryWithVar),
         variables: { personNum: 1 },
@@ -320,7 +363,7 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.use([testWare1, testWare2]);
+      swapi.use(testWare1).use(testWare2);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -343,8 +386,8 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: swapiUrl });
-      swapi.use([testWare1])
-        .use([testWare2]);
+      swapi.use(testWare1)
+        .use(testWare2);
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
         variables: {},
@@ -362,11 +405,7 @@ describe('apollo-fetch', () => {
   describe('afterware', () => {
     it('should return errors thrown in afterwares', () => {
       const apolloFetch = createApolloFetch({ uri: swapiUrl });
-      apolloFetch.useAfter([{
-        applyAfterware() {
-          throw Error('Afterware error');
-        },
-      }]);
+      apolloFetch.useAfter(() => { throw Error('Afterware error'); });
 
       const simpleRequest = {
         query: print(simpleQueryWithNoVars),
@@ -380,40 +419,58 @@ describe('apollo-fetch', () => {
         'Afterware error',
       );
     });
-    it('should throw an error if appyAfterware function is missing', () => {
-      const malWare = TestAfterWare();
-      delete malWare.applyAfterware;
+
+    it('should throw an error if afterware is not a function', () => {
+      const malWare = {} as any;
       const apolloFetch = createApolloFetch({ uri: '/graphql' });
 
       try {
-        apolloFetch.useAfter([malWare]);
+        apolloFetch.useAfter(malWare);
         expect.fail();
       } catch (error) {
         assert.equal(
           error.message,
-          'Afterware must implement the applyAfterware function',
+          'Afterware must be a function',
         );
       }
     });
 
-    it('handle multiple afterware', () => {
-      const spy = sinon.spy();
-      const afterware1 = {
-        applyAfterware: ({ response }, next) => {
-          assert.deepEqual(response.status, 200);
-          spy();
-          next();
+    it('can modify response to add data when reponse is unparsable', () => {
+      const parsedData = {
+        data: {
+          mock: 'stub',
         },
       };
-      const afterware2 = {
-        applyAfterware: ({response}, next) => {
-          spy();
-          next();
-        },
+      const afterware = ({ response }, next) => {
+        assert.deepEqual(response.status, 403);
+        assert.deepEqual(response.raw, '');
+        assert.isUndefined(response.parsed);
+
+        response.parsed = parsedData;
+        next();
+      };
+      const apolloFetch = createApolloFetch({ uri: forbiddenUrl });
+
+      apolloFetch.useAfter(afterware);
+
+      return assert.eventually.deepEqual(apolloFetch({ query: '' }), parsedData);
+    });
+
+    it('handle multiple afterware', () => {
+      const spy = sinon.spy();
+      const afterware1 = ({ response }, next) => {
+        assert.deepEqual(response.status, 200);
+        spy();
+        next();
+      };
+      const afterware2 = ({ response }, next) => {
+        spy();
+        next();
       };
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.useAfter([afterware1, afterware2]);
+      swapi.useAfter(afterware1);
+      swapi.useAfter(afterware2);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -441,7 +498,7 @@ describe('apollo-fetch', () => {
       ]);
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.use([testWare1, testWare2]);
+      swapi.use(testWare1).use(testWare2);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -460,22 +517,19 @@ describe('apollo-fetch', () => {
 
     it('handle multiple afterware', () => {
       const spy = sinon.spy();
-      const afterware1 = {
-        applyAfterware: ({ response }, next) => {
-          assert.deepEqual(response.status, 200);
-          spy();
-          next();
-        },
+
+      const afterware1 = ({ response }, next) => {
+        assert.deepEqual(response.status, 200);
+        spy();
+        next();
       };
-      const afterware2 = {
-        applyAfterware: ({response}, next) => {
-          spy();
-          next();
-        },
+      const afterware2 = ({ response }, next) => {
+        spy();
+        next();
       };
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.useAfter([afterware1, afterware2]);
+      swapi.useAfter(afterware1).useAfter(afterware2);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -505,23 +559,20 @@ describe('apollo-fetch', () => {
       ]);
 
       const spy = sinon.spy();
-      const afterware1 = {
-        applyAfterware: ({ response }, next) => {
-          assert.deepEqual(response.status, 200);
-          spy();
-          next();
-        },
+
+      const afterware1 = ({ response }, next) => {
+        assert.deepEqual(response.status, 200);
+        spy();
+        next();
       };
-      const afterware2 = {
-        applyAfterware: ({response}, next) => {
-          spy();
-          next();
-        },
+      const afterware2 = ({ response }, next) => {
+        spy();
+        next();
       };
 
       const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
-      swapi.useAfter([afterware1, afterware2])
-        .use([testWare1, testWare2]);
+      swapi.useAfter(afterware1).useAfter(afterware2)
+        .use(testWare1).use(testWare2);
       // this is a stub for the end user client api
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -548,37 +599,19 @@ function TestWare(
   bodyParams: Array<{ key: string, val: any }> = [],
 ) {
 
-  return {
-    applyMiddleware: (request: RequestAndOptions, next: Function): void => {
-      variables.map((variable) => {
-        (<any>request.request.variables)[variable.key] = variable.val;
-      });
+  return (request: RequestAndOptions, next: Function): void => {
+    variables.map((variable) => {
+      (<any>request.request.variables)[variable.key] = variable.val;
+    });
 
-      options.map((variable) => {
-        (<any>request.options)[variable.key] = variable.val;
-      });
+    options.map((variable) => {
+      (<any>request.options)[variable.key] = variable.val;
+    });
 
-      bodyParams.map((param) => {
-        request.request[param.key as string] = param.val;
-      });
+    bodyParams.map((param) => {
+      request.request[param.key as string] = param.val;
+    });
 
-      next();
-    },
-  };
-}
-
-// simulate afterware by altering variables and options
-function TestAfterWare(
-  options: Array<{ key: string, val: any }> = [],
-) {
-
-  return {
-    applyAfterware: (response: ResponseAndOptions, next: Function): void => {
-      options.map((variable) => {
-        (<any>response.options)[variable.key] = variable.val;
-      });
-
-      next();
-    },
+    next();
   };
 }

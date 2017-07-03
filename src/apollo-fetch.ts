@@ -8,6 +8,7 @@ import {
   ApolloFetch,
   ParsedResponse,
   GraphQLRequest,
+  FetchError,
 } from './types';
 import 'isomorphic-fetch';
 
@@ -26,7 +27,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
           if (funcs.length > 0) {
             const f = funcs.shift();
             if (f) {
-              f.applyMiddleware.apply(scope, [{ request, options }, next]);
+              f.apply(scope, [{ request, options }, next]);
             }
           } else {
             resolve({
@@ -52,7 +53,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
           if (funcs.length > 0) {
             const f = funcs.shift();
             if (f) {
-              f.applyAfterware.apply(scope, [responseObject, next]);
+              f.apply(scope, [responseObject, next]);
             }
           } else {
             resolve(responseObject);
@@ -95,10 +96,9 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
       httpError = new Error(`Network request failed to return valid JSON`);
     }
     (httpError as any).response = response;
-    (httpError as any).raw = response.raw;
     (httpError as any).parseError = error;
 
-    throw httpError;
+    throw httpError as FetchError;
   };
 
   const apolloFetch: ApolloFetch = <ApolloFetch>Object.assign(
@@ -119,7 +119,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
             parseError = e;
 
             //pass parsed raw response onto afterware
-            return <ParsedResponse>{ ...response, raw, parsed: null };
+            return <ParsedResponse>{ ...response, raw };
           }
         }),
         //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
@@ -137,30 +137,24 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
       });
     },
     {
-      use: (middlewares: MiddlewareInterface[]) => {
-        middlewares.map( middleware => {
-          if (typeof middleware.applyMiddleware === 'function') {
-            _middlewares.push(middleware);
-          } else {
-            throw new Error('Middleware must implement the applyMiddleware function');
-          }
-        });
+      use: (middleware: MiddlewareInterface) => {
+        if (typeof middleware === 'function') {
+          _middlewares.push(middleware);
+        } else {
+          throw new Error('Middleware must be a function');
+        }
 
         return apolloFetch;
       },
-      useAfter: (afterwares: AfterwareInterface[]) => {
-        afterwares.map( afterware => {
-          if (typeof afterware.applyAfterware === 'function') {
-            _afterwares.push(afterware);
-          } else {
-            throw new Error('Afterware must implement the applyAfterware function');
-          }
-        });
+      useAfter: (afterware: AfterwareInterface) => {
+        if (typeof afterware === 'function') {
+          _afterwares.push(afterware);
+        } else {
+          throw new Error('Afterware must be a function');
+        }
 
         return apolloFetch;
       },
-      _middlewares, //Added as hooks for testing
-      _afterwares,
     },
   );
 
