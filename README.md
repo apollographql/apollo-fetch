@@ -9,7 +9,7 @@ By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of us
 To create a fetch function capable of supporting middleware and afterware, use `createApolloFetch`:
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 const apolloFetch = createApolloFetch({ uri });
@@ -19,13 +19,13 @@ To execute the fetch function, call `apolloFetch` directly in the following way:
 
 ```js
 apolloFetch({ query, variables, operationName }) //all apolloFetch arguments are optional
-.then( result => {
-  const { data, error, extensions } = result;
-  //GraphQL errors and extensions are optional
-})
-.catch( error => {
-  //respond to a network error
-})
+  .then(result => {
+    const { data, error, extensions } = result;
+    //GraphQL errors and extensions are optional
+  })
+  .catch(error => {
+    //respond to a network error
+  });
 ```
 
 Middleware and Afterware are added with `use` and `useAfter` directly to `apolloFetch`:
@@ -49,11 +49,12 @@ Middleware and Afterware can be chained together in any order:
 
 ```js
 const apolloFetch = createApolloFetch();
-apolloFetch.use([ middleware1 ])
-  .use([ middleware2 ])
-  .useAfter([ afterware1, afterware2 ])
-  .useAfter([ afterware3 ])
-  .use([ middleware3 ]);
+apolloFetch
+  .use([middleware1])
+  .use([middleware2])
+  .useAfter([afterware1, afterware2])
+  .useAfter([afterware3])
+  .use([middleware3]);
 ```
 
 The `apolloFetch` from `apollo-fetch` is an alias for an empty call to `createApolloFetch`
