@@ -63,15 +63,6 @@ apolloFetch
   .use(middleware3);
 ```
 
-The `apolloFetch` from `apollo-fetch` is an alias for an empty call to `createApolloFetch`
-
-```js
-import { apolloFetch } from `apollo-fetch`;
-
-//fetches a query from /graphql
-apolloFetch({ query }).then(...).catch(...);
-```
-
 For mocking and other fetching behavior, you may pass a fetch into `createApolloFetch`:
 
 ```js
@@ -149,6 +140,13 @@ apolloFetch.use(({ request, options }, next) => {
 apolloFetch(...).then(...).catch(...);
 ```
 
+For mocking and other fetching behavior, you may pass a fetch implementation into `createApolloFetch`:
+
+```js
+const customFetch = createFileFetch();
+const apolloFetch = createApolloFetch({ customFetch });
+```
+
 ### Afterware
 
 Afterware to check the response status and logout on a 401.
@@ -169,6 +167,28 @@ apolloFetch.useAfter(({ response }, next) => {
 });
 
 apolloFetch(...).then(...).catch(...);
+```
+
+### Mocking a Fetch Call
+
+This example uses a custom fetch to mock an unauthorized(401) request with a non-standard response body.
+`apollo-fetch` replaces the call to `fetch` with `customFetch`, which both follow the standard [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+
+```js
+const customFetch = () => new Promise((resolve, reject) => {
+  const init = {
+    status: 401,
+    statusText: 'Unauthorized',
+  };
+  const body = JSON.stringify({
+    data: {
+      user: null,
+    }
+  });
+  resolve(new Response(body, init));
+}
+
+const apolloFetch = createApolloFetch({ customFetch });
 ```
 
 ### Error Handling
