@@ -1,10 +1,11 @@
 {
   "name": "apollo-fetch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight implementation of fetch for GraphQL requests",
   "author": "Evans Hauser <evanshauser@gmail.com>",
   "contributors": [
-    "Jonas Helfer <jonas@helfer.email>"
+    "Jonas Helfer <jonas@helfer.email>",
+    "Sashko Stubailo <sashko@stubailo.com>"
   ],
   "license": "MIT",
   "main": "./dist/src/index.js",

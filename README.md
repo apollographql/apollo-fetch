@@ -206,6 +206,31 @@ apolloFetch.useAfter(({ response }, next) => {
 apolloFetch(...).then(...).catch(...);
 ```
 
+### Apollo Integration
+
+`apollo-fetch` is the first part of [Apollo Client's](https://github.com/apollographql/apollo-client) future network stack.
+If you would like to try it out today,
+you may replace the network interface with the following:
+
+```js
+import ApolloClient from 'apollo-client';
+import { createApolloFetch } from 'apollo-fetch';
+import { print } from 'graphql/language/printer';
+
+const uri = 'http://api.githunt.com/graphql';
+
+const apolloFetch = createApolloFetch({ uri });
+
+const networkInterface = {
+  request: (req) => apolloFetch({...req, query: print(req.query)})
+}
+
+const client = new ApolloClient({
+  networkInterface,
+});
+```
+
+
 # API
 
 `createApolloFetch` is a factory for `ApolloFetch`, a fetch function with middleware and afterware capabilities.
