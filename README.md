@@ -55,7 +55,8 @@ Middleware and Afterware can be chained together in any order:
 
 ```js
 const apolloFetch = createApolloFetch();
-apolloFetch.use(middleware1)
+apolloFetch
+  .use(middleware1)
   .use(middleware2)
   .useAfter(afterware1)
   .useAfter(afterware2)
@@ -83,7 +84,7 @@ const apolloFetch = createApolloFetch({ customFetch });
 ### Simple GraphQL Query
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
@@ -102,7 +103,7 @@ apolloFetch({ query }).then(...).catch(...);
 ### Simple GraphQL Mutation with Variables
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
@@ -154,7 +155,7 @@ Afterware to check the response status and logout on a 401.
 The afterware has access to the raw reponse always and parsed response when the data is proper JSON.
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
@@ -181,7 +182,7 @@ This means if a server returns a parsable GraphQL result on a 403 for example, t
 Errors in Middleware and Afterware are propagated without modification.
 
 ```js
-import { createApolloFetch } from 'apollo-fetch'
+import { createApolloFetch } from 'apollo-fetch';
 
 const uri = 'http://api.githunt.com/graphql';
 
