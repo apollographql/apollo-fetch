@@ -179,7 +179,7 @@ describe('apollo-fetch', () => {
       const options = fetchMock.lastCall(uri)[1];
       const body = JSON.parse(options.body);
       assert.deepEqual(options.method, 'POST');
-      assert.deepEqual(options.headers, {Accept: '*/*', 'Content-Type': 'application/json'});
+      assert.deepEqual(options.headers, {'Content-Type': 'application/json'});
       assert.deepEqual(body.query, print(sampleQuery));
     });
 
