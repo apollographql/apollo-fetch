@@ -2,6 +2,8 @@
 
 ### vNEXT
 
+- Adds support for UMD and ES2015 modules (tree-shaking) [PR #9](https://github.com/apollographql/apollo-fetch/pull/9)
+
 ### 0.5.0
 
 - Export all TypeScript types. [PR #13](https://github.com/apollographql/apollo-fetch/pull/13)

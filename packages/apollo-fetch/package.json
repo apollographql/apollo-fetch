@@ -6,11 +6,14 @@
   "contributors": [
     "Jonas Helfer <jonas@helfer.email>",
     "Sashko Stubailo <sashko@stubailo.com>",
-    "Jayden Seric <me@jaydenseric.com>"
+    "Jayden Seric <me@jaydenseric.com>",
+    "Kamil Kisiela <kamil.kisiela@gmail.com>"
   ],
   "license": "MIT",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts",
+  "main": "./dist/bundle.umd.js",
+  "module": "./dist/index.js",
+  "jsnext:main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch"
@@ -20,16 +23,20 @@
   },
   "homepage": "https://github.com/apollographql/apollo-fetch#readme",
   "scripts": {
-    "pretest": "npm run build",
+    "pretest": "npm run build-test",
     "test": "npm run test-only --",
     "posttest": "npm run lint",
     "test-only": "mocha --reporter spec --full-trace dist/tests/tests.js",
     "test-watch": "mocha --reporter spec --full-trace dist/tests/tests.js --watch",
     "coverage:test": "_mocha --reporter dot --full-trace dist/tests/tests.js",
     "coverage": "nyc --reporter=lcov npm run coverage:test",
-    "lint": "tslint --type-check -p tsconfig.json src/*.ts && tslint --type-check -p tsconfig.json tests/*.ts",
+    "lint": "tslint --type-check -p tsconfig.test.json src/*.ts && tslint --type-check -p tsconfig.test.json tests/*.ts",
     "prebuild": "npm run clean:dist",
+    "prebuild-test": "npm run clean:dist",
     "build": "tsc",
+    "build-test": "tsc -p tsconfig.test.json",
+    "postbuild": "npm run bundle",
+    "bundle": "rollup -c",
     "watch": "tsc -w",
     "clean": "npm run clean:dist && npm run clean:coverage",
     "clean:dist": "rimraf dist/*",
@@ -53,6 +60,7 @@
     "mocha": "^3.2.0",
     "nyc": "^11.0.3",
     "rimraf": "^2.5.4",
+    "rollup": "^0.45.2",
     "sinon": "^2.3.4",
     "source-map-support": "^0.4.5",
     "tslint": "^5.0.0",

@@ -1,21 +1,6 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["es6", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "removeComments": true,
-    "sourceMap": true,
-    "declaration": true,
-    "rootDir": ".",
-    "outDir": "dist",
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
-    "noUnusedLocals": true,
-    "skipLibCheck": true
-  },
+  "extends": "./tsconfig.base",
   "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts"
+    "src/**/*.ts"
   ]
 }
