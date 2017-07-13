@@ -10,6 +10,7 @@ import {
   GraphQLRequest,
   FetchError,
 } from './types';
+import { extractFiles } from 'extract-files';
 import 'isomorphic-fetch';
 
 export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
@@ -68,24 +69,33 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
   };
 
   const callFetch = ({ request, options }) => {
-    let body;
-    try {
-      body = JSON.stringify(request);
-    } catch (e) {
-      throw new Error(`Network request failed. Payload is not serizable: ${e.message}`);
+    const fetchOptions = {
+      method: 'POST',
+      headers: {},
+      ...options,
+    };
+
+    // If uploads are possible extract files from the request variables
+    const files = typeof FormData !== 'undefined'
+      ? extractFiles(request.variables, 'variables')
+      : [];
+
+    if (files.length) {
+      // Prepare a multipart form request
+      fetchOptions.body = new FormData();
+      fetchOptions.body.append('operations', JSON.stringify(request));
+      files.forEach(({ path, file }) => fetchOptions.body.append(path, file));
+    } else {
+      // Prepare a standard JSON request
+      fetchOptions.headers['Content-Type'] = 'application/json';
+      try {
+        fetchOptions.body = JSON.stringify(request);
+      } catch (e) {
+        throw new Error(`Network request failed. Payload is not serizable: ${e.message}`);
+      }
     }
 
-    const opts = {
-      body,
-      method: 'POST',
-      ...options,
-      headers: {
-        Accept: '*/*',
-        'Content-Type': 'application/json',
-        ...(options.headers || []),
-      },
-    };
-    return customFetch ? customFetch(_uri, opts) : fetch(_uri, opts);
+    return (customFetch || fetch)(_uri, fetchOptions);
   };
 
   const throwHttpError = (response, error) => {
