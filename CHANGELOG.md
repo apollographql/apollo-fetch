@@ -2,7 +2,7 @@
 
 ### vNEXT
 
-Files can now be uploaded via mutation or query input variables, implementing the [`apollo-upload-client`](https://github.com/jaydenseric/apollo-upload-client) multipart request method. Setup [`apollo-upload-server`](https://github.com/jaydenseric/apollo-upload-server) to use this feature until support is added to [`graphql-server`](https://github.com/apollographql/graphql-server). Fixed [#6](https://github.com/apollographql/apollo-fetch/issues/6).
+Files can now be uploaded via mutation or query input variables, implementing the [`apollo-upload-client`](https://github.com/jaydenseric/apollo-upload-client) multipart request method. Setup [`apollo-upload-server`](https://github.com/jaydenseric/apollo-upload-server) to use this feature until support is added to [`graphql-server`](https://github.com/apollographql/graphql-server). Fixed [#6](https://github.com/apollographql/apollo-fetch/issues/6) via [#8](https://github.com/apollographql/apollo-fetch/pull/8).
 
 ### 0.3.0
 
