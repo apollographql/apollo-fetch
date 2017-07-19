@@ -72,7 +72,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     try {
       body = JSON.stringify(request);
     } catch (e) {
-      throw new Error(`Network request failed. Payload is not serizable: ${e.message}`);
+      throw new Error(`Network request failed. Payload is not serializable: ${e.message}`);
     }
 
     const opts = {

@@ -435,7 +435,7 @@ describe('apollo-fetch', () => {
       }
     });
 
-    it('can modify response to add data when reponse is unparsable', () => {
+    it('can modify response to add data when response is not parsable', () => {
       const parsedData = {
         data: {
           mock: 'stub',
@@ -483,7 +483,7 @@ describe('apollo-fetch', () => {
 
       return swapi(simpleRequest).then( result => {
         assert.deepEqual(result, <FetchResult>complexResult);
-        assert(spy.calledTwice, 'both aftwerware should be called');
+        assert(spy.calledTwice, 'both afterware should be called');
       }).catch(console.log);
     });
   });
@@ -542,11 +542,11 @@ describe('apollo-fetch', () => {
 
       return swapi(simpleRequest).then( result => {
         assert.deepEqual(result, <FetchResult>complexResult);
-        assert(spy.calledTwice, 'both aftwerware should be called');
+        assert(spy.calledTwice, 'both afterware should be called');
         spy.reset();
       }).then(() => swapi(simpleRequest).then( result => {
         assert.deepEqual(result, <FetchResult>complexResult);
-        assert(spy.calledTwice, 'both aftwerware should be called');
+        assert(spy.calledTwice, 'both afterware should be called');
       }));
     });
 
@@ -582,11 +582,11 @@ describe('apollo-fetch', () => {
 
       return swapi(simpleRequest).then( result => {
         assert.deepEqual(result, <FetchResult>complexResult);
-        assert(spy.calledTwice, 'both aftwerware should be called');
+        assert(spy.calledTwice, 'both afterware should be called');
         spy.reset();
       }).then(() => swapi(simpleRequest).then( result => {
         assert.deepEqual(result, <FetchResult>complexResult);
-        assert(spy.calledTwice, 'both aftwerware should be called');
+        assert(spy.calledTwice, 'both afterware should be called');
       }));
     });
   });
