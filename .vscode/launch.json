@@ -11,9 +11,9 @@
                 "spec",
                 "--trace-warnings",
                 "--full-trace",
-                "${workspaceRoot}/dist/tests/tests.js"
+                "${workspaceRoot}/**/dist/tests/tests.js"
             ],
-            "outFiles": ["${workspaceRoot}/dist/**/*.js"],
+            "outFiles": ["${workspaceRoot}/**/dist/**/*.js"],
             "sourceMaps": true,
             "internalConsoleOptions": "openOnSessionStart",
             "stopOnEntry": false,
