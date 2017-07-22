@@ -7,7 +7,7 @@ import { print } from 'graphql';
 import * as fetchMock from 'fetch-mock';
 import {
   createApolloFetch,
-  apolloFetch as apolloFetchWrapper,
+  constructDefaultOptions,
 } from '../src/apollo-fetch';
 import {
   RequestAndOptions,
@@ -19,243 +19,246 @@ chai.use(chaiAsPromised);
 const { assert, expect } = chai;
 
 const sampleQuery = gql`
-query SampleQuery {
-  stub{
-    id
+  query SampleQuery {
+    stub{
+      id
+    }
   }
-}
 `;
 
-describe('apollo-fetch', () => {
-  const postData = {hello: 'world', method: 'POST'};
-  const data = JSON.stringify({data: { hello: 'world', uri: '/graphql' }});
-  const alternateData = JSON.stringify({data: { hello: 'alternate world', uri: 'alternate' }});
-  const unparsableData = 'raw string';
-  const unauthorizedData = {
-    data: {
-      user: null,
-    },
-  };
-
-  const mockError = { throws: new TypeError('mock me') };
-
-  const swapiUrl = 'http://graphql-swapi.test/';
-  const missingUrl = 'http://does-not-exist.test/';
-
-  const unauthorizedUrl = 'http://unauthorized.test/';
-  const forbiddenUrl = 'http://forbidden.test/';
-  const serviceUnavailableUrl = 'http://service-unavailable.test/';
-
-  const simpleQueryWithNoVars = gql`
-    query people {
-      allPeople(first: 1) {
-        people {
-          name
-        }
+const simpleQueryWithNoVars = gql`
+  query people {
+    allPeople(first: 1) {
+      people {
+        name
       }
     }
-  `;
+  }
+`;
 
-  const simpleQueryWithVar = gql`
-    query people($personNum: Int!) {
-      allPeople(first: $personNum) {
-        people {
-          name
-        }
+const simpleQueryWithVar = gql`
+  query people($personNum: Int!) {
+    allPeople(first: $personNum) {
+      people {
+        name
       }
     }
-  `;
+  }
+`;
 
-  const simpleResult = {
-    data: {
-      allPeople: {
-        people: [
-          {
-            name: 'Luke Skywalker',
-          },
-        ],
-      },
+const simpleResult = {
+  data: {
+    allPeople: {
+      people: [
+        {
+          name: 'Luke Skywalker',
+        },
+      ],
     },
-  };
+  },
+};
 
-  const complexQueryWithTwoVars = gql`
-    query people($personNum: Int!, $filmNum: Int!) {
-      allPeople(first: $personNum) {
-        people {
-          name
-          filmConnection(first: $filmNum) {
-            edges {
-              node {
-                id
-              }
+const complexQueryWithTwoVars = gql`
+  query people($personNum: Int!, $filmNum: Int!) {
+    allPeople(first: $personNum) {
+      people {
+        name
+        filmConnection(first: $filmNum) {
+          edges {
+            node {
+              id
             }
           }
         }
       }
     }
-  `;
+  }
+`;
 
-  const complexResult = {
-    data: {
-      allPeople: {
-        people: [
-          {
-            name: 'Luke Skywalker',
-            filmConnection: {
-              edges: [
-                {
-                  node: {
-                    id: 'ZmlsbXM6MQ==',
-                  },
+const complexResult = {
+  data: {
+    allPeople: {
+      people: [
+        {
+          name: 'Luke Skywalker',
+          filmConnection: {
+            edges: [
+              {
+                node: {
+                  id: 'ZmlsbXM6MQ==',
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
     },
-  };
+  },
+};
 
-  before(() => {
+const swapiUrl = 'http://graphql-swapi.test/';
+const unauthorizedUrl = 'http://unauthorized.test/';
+const forbiddenUrl = 'http://forbidden.test/';
+const serviceUnavailableUrl = 'http://service-unavailable.test/';
+const missingUrl = 'http://does-not-exist.test/';
 
-    fetchMock.post('/graphql', data);
-    fetchMock.post('alternate', alternateData);
-    fetchMock.post('/raw', unparsableData);
-    fetchMock.post('data', postData);
-    fetchMock.post('error', mockError);
-    fetchMock.post('test', data);
+const swapiResolver = (url, opts) => {
+  const { query, variables } = JSON.parse((opts as RequestInit).body!.toString());
 
-    fetchMock.post(unauthorizedUrl, unauthorizedData);
+  if (query === print(simpleQueryWithNoVars)) {
+    return simpleResult;
+  }
 
-    fetchMock.post(swapiUrl, (url, opts) => {
-      const { query, variables } = JSON.parse((opts as RequestInit).body!.toString());
+  if (query === print(simpleQueryWithVar)
+    && isEqual(variables, { personNum: 1 })) {
+    return simpleResult;
+  }
 
-      if (query === print(simpleQueryWithNoVars)) {
-        return simpleResult;
-      }
+  if (query === print(complexQueryWithTwoVars)
+    && isEqual(variables, { personNum: 1, filmNum: 1 })) {
+    return complexResult;
+  }
+  throw new Error('Invalid Query');
+};
 
-      if (query === print(simpleQueryWithVar)
-          && isEqual(variables, { personNum: 1 })) {
-        return simpleResult;
-      }
+describe('apollo-fetch', () => {
+  describe('single request', () => {
+    const postData = {hello: 'world', method: 'POST'};
+    const data = JSON.stringify({data: { hello: 'world', uri: '/graphql' }});
+    const alternateData = JSON.stringify({data: { hello: 'alternate world', uri: 'alternate' }});
+    const unparsableData = 'raw string';
+    const unauthorizedData = {
+      data: {
+        user: null,
+      },
+    };
 
-      if (query === print(complexQueryWithTwoVars)
-          && isEqual(variables, { personNum: 1, filmNum: 1 })) {
-        return complexResult;
-      }
-      throw new Error('Invalid Query');
-    });
-    fetchMock.post(missingUrl, () => {
-      throw new Error('Network error');
-    });
+    const mockError = { throws: new TypeError('mock me') };
 
-    fetchMock.post(forbiddenUrl, 403);
-    fetchMock.post(serviceUnavailableUrl, 503);
-  });
+    before(() => {
 
-  afterEach(fetchMock.reset);
+      fetchMock.post('/graphql', data);
+      fetchMock.post('alternate', alternateData);
+      fetchMock.post('/raw', unparsableData);
+      fetchMock.post('data', postData);
+      fetchMock.post('error', mockError);
+      fetchMock.post('test', data);
 
-  it('should not throw with no arguments', () => {
-    assert.doesNotThrow(createApolloFetch);
-  });
+      fetchMock.post(unauthorizedUrl, unauthorizedData);
 
-  it('should call fetch', () => {
-    const fetcher = createApolloFetch();
-    const result = fetcher({query: print(sampleQuery)});
-    return result.then((response) => {
-      assert.deepEqual(fetchMock.calls('/graphql').length, 1);
-      assert.deepEqual(response, JSON.parse(data));
-    });
-  });
-
-  const callAndCheckFetch = (uri, fetcher) => {
-    const result = fetcher({query: print(sampleQuery)});
-
-    return result.then((response) => {
-      //correct response
-      assert.deepEqual(response, JSON.parse(data));
-
-      assert.deepEqual(fetchMock.lastCall(uri)[0], uri);
-      const options = fetchMock.lastCall(uri)[1];
-      const body = JSON.parse((<RequestInit>options).body);
-      assert.deepEqual(options.method, 'POST');
-      assert.deepEqual(options.headers, {Accept: '*/*', 'Content-Type': 'application/json'});
-      assert.deepEqual(body.query, print(sampleQuery));
-    });
-
-  };
-
-  it('should call fetch with correct arguments and result', () => {
-    const uri = 'test';
-    const fetcher = createApolloFetch({uri});
-    return callAndCheckFetch(uri, fetcher);
-  });
-
-  it('should make two successful requests', () => {
-    const uri = 'test';
-    const fetcher = createApolloFetch({uri});
-    return callAndCheckFetch(uri, fetcher)
-      .then(() => callAndCheckFetch(uri, fetcher));
-  });
-
-  it('should pass an error onto the Promise', () => {
-    const uri = 'error';
-    const fetcher = createApolloFetch({uri, customFetch: fetch});
-    const result = fetcher({query: print(sampleQuery)});
-    return assert.isRejected(result, mockError.throws, mockError.throws.message);
-  });
-
-  it('should catch on a network error', () => {
-    const fetcher = createApolloFetch({uri: forbiddenUrl});
-    const result = fetcher({query: print(sampleQuery)});
-    return result.then(expect.fail)
-      .catch((error) => {
-        assert.deepEqual(error.message, 'Network request failed with status 403 - \"Forbidden\"');
-        assert.isDefined(error.response);
-        assert.isDefined(error.parseError);
+      fetchMock.post(swapiUrl, swapiResolver);
+      fetchMock.post(missingUrl, () => {
+        throw new Error('Network error');
       });
-  });
 
-  it('should return a fail to parse response when fetch returns raw response', () => {
-    const fetcher = createApolloFetch({uri: '/raw'});
-    const result = fetcher({query: print(sampleQuery)});
-    return result.then(expect.fail)
-      .catch((error) => {
-        assert.deepEqual(error.message, 'Network request failed to return valid JSON');
-        assert.isDefined(error.response);
-        assert.deepEqual(error.response.raw, unparsableData);
+      fetchMock.post(forbiddenUrl, 403);
+      fetchMock.post(serviceUnavailableUrl, 503);
+    });
+
+    afterEach(fetchMock.reset);
+
+    after(fetchMock.restore);
+
+    it('should not throw with no arguments', () => {
+      assert.doesNotThrow(createApolloFetch);
+    });
+
+    it('should call fetch', () => {
+      const fetcher = createApolloFetch();
+      const result = fetcher({query: print(sampleQuery)});
+      return result.then((response) => {
+        assert.deepEqual(fetchMock.calls('/graphql').length, 1);
+        assert.deepEqual(response, JSON.parse(data));
       });
-  });
-
-  it('should pass the parsed response if valid regardless of the status', () => {
-    const fetcher = createApolloFetch({
-      uri: unauthorizedUrl,
-      customFetch: () => new Promise((resolve, reject) => {
-        const init = {
-          status: 401,
-          statusText: 'Unauthorized',
-        };
-        const body = JSON.stringify(unauthorizedData);
-        resolve(new Response(body, init));
-      }),
     });
 
-    return fetcher({query: print(sampleQuery)}).then((result) => {
-        assert.deepEqual(result.data, unauthorizedData.data);
-    });
-  });
+    const callAndCheckFetch = (uri, fetcher) => {
+      const result = fetcher({query: print(sampleQuery)});
 
-  describe('apolloFetch wrapper', () => {
-    it('should take a operation make a call to fetch at /graphql with the correct body', () => {
-      const operation = {variables: {}};
-      return apolloFetchWrapper(operation).then(result => {
-        assert.deepEqual(result, JSON.parse(data));
-        assert.deepEqual(JSON.parse((fetchMock.lastCall()[1] as any).body), operation);
+      return result.then((response) => {
+        //correct response
+        assert.deepEqual(response, JSON.parse(data));
+
+        assert.deepEqual(fetchMock.lastCall(uri)[0], uri);
+        const options = fetchMock.lastCall(uri)[1];
+        const body = JSON.parse((<RequestInit>options).body);
+        assert.deepEqual(options.method, 'POST');
+        assert.deepEqual(options.headers, {Accept: '*/*', 'Content-Type': 'application/json'});
+        assert.deepEqual(body.query, print(sampleQuery));
+      });
+
+    };
+
+    it('should call fetch with correct arguments and result', () => {
+      const uri = 'test';
+      const fetcher = createApolloFetch({uri});
+      return callAndCheckFetch(uri, fetcher);
+    });
+
+    it('should make two successful requests', () => {
+      const uri = 'test';
+      const fetcher = createApolloFetch({uri});
+      return callAndCheckFetch(uri, fetcher)
+        .then(() => callAndCheckFetch(uri, fetcher));
+    });
+
+    it('should pass an error onto the Promise', () => {
+      const uri = 'error';
+      const fetcher = createApolloFetch({uri, customFetch: fetch});
+      const result = fetcher({query: print(sampleQuery)});
+      return assert.isRejected(result, mockError.throws, mockError.throws.message);
+    });
+
+    it('should catch on a network error', () => {
+      const fetcher = createApolloFetch({uri: forbiddenUrl});
+      const result = fetcher({query: print(sampleQuery)});
+      return result.then(expect.fail)
+        .catch((error) => {
+          assert.deepEqual(error.message, 'Network request failed with status 403 - \"Forbidden\"');
+          assert.isDefined(error.response);
+          assert.isDefined(error.parseError);
+        });
+    });
+
+    it('should return a fail to parse response when fetch returns raw response', () => {
+      const fetcher = createApolloFetch({uri: '/raw'});
+      const result = fetcher({query: print(sampleQuery)});
+      return result.then(expect.fail)
+        .catch((error) => {
+          assert.deepEqual(error.message, 'Network request failed to return valid JSON');
+          assert.isDefined(error.response);
+          assert.deepEqual(error.response.raw, unparsableData);
+        });
+    });
+
+    it('should pass the parsed response if valid regardless of the status', () => {
+      const fetcher = createApolloFetch({
+        uri: unauthorizedUrl,
+        customFetch: () => new Promise((resolve, reject) => {
+          const init = {
+            status: 401,
+            statusText: 'Unauthorized',
+          };
+          const body = JSON.stringify(unauthorizedData);
+          resolve(new Response(body, init));
+        }),
+      });
+
+      return fetcher({query: print(sampleQuery)}).then((result) => {
+          assert.deepEqual(result.data, unauthorizedData.data);
       });
     });
   });
 
   describe('middleware', () => {
+
+    before(() => {
+      fetchMock.post(swapiUrl, swapiResolver);
+    });
+
+    afterEach(fetchMock.reset);
+    after(fetchMock.restore);
+
     it('should throw an error if middleware is not a function', () => {
       const malWare: any = {};
       const apolloFetch = createApolloFetch({ uri: '/graphql' });
@@ -403,6 +406,15 @@ describe('apollo-fetch', () => {
   });
 
   describe('afterware', () => {
+
+    before(() => {
+      fetchMock.post(swapiUrl, swapiResolver);
+      fetchMock.post(forbiddenUrl, 403);
+    });
+
+    afterEach(fetchMock.reset);
+    after(fetchMock.restore);
+
     it('should return errors thrown in afterwares', () => {
       const apolloFetch = createApolloFetch({ uri: swapiUrl });
       apolloFetch.useAfter(() => { throw Error('Afterware error'); });
@@ -489,6 +501,14 @@ describe('apollo-fetch', () => {
   });
 
   describe('multiple requests', () => {
+
+    before(() => {
+      fetchMock.post(swapiUrl, swapiResolver);
+    });
+
+    afterEach(fetchMock.reset);
+    after(fetchMock.restore);
+
     it('handle multiple middlewares', () => {
       const testWare1 = TestWare([
         { key: 'personNum', val: 1 },
@@ -588,6 +608,213 @@ describe('apollo-fetch', () => {
         assert.deepEqual(result, <FetchResult>complexResult);
         assert(spy.calledTwice, 'both afterware should be called');
       }));
+    });
+  });
+
+  describe('batched query', () => {
+    const data = {data: { hello: 'world', uri: '/graphql' }};
+    const batch = [data, data];
+
+    before(() => {
+      fetchMock.post('batch', batch);
+      fetchMock.post('failed batch', data);
+    });
+
+    afterEach(() => {
+      fetchMock.reset();
+    });
+
+    it('should call Fetch with GraphQLRequest Array and return the array of FetchResults', () => {
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+      });
+
+      const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+
+      return apolloFetch(operations)
+        .then(results => {
+          assert.deepEqual(results, batch);
+          assert(fetchMock.called('batch'));
+          assert.equal(fetchMock.calls('batch').length, 1);
+          assert.deepEqual((<RequestInit>fetchMock.lastCall('batch')[1]).body, JSON.stringify(operations));
+        });
+    });
+
+    it('should call Fetch with GraphQLRequest Array and return the array of FetchResults', () => {
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+      });
+
+      const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+
+      return apolloFetch(operations)
+        .then(results => {
+          assert.deepEqual(results, batch);
+          assert(fetchMock.called('batch'));
+          assert.equal(fetchMock.calls('batch').length, 1);
+          assert.deepEqual((<RequestInit>fetchMock.lastCall('batch')[1]).body, JSON.stringify(operations));
+        });
+    });
+
+    it('should throw an error if response is not an array', done => {
+      const apolloFetch = createApolloFetch({
+        uri: 'failed batch',
+      });
+
+      const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+
+      apolloFetch(operations)
+        .then(assert)
+        .catch(error => {
+          done();
+        });
+    });
+  });
+
+  describe('batched Middleware', () => {
+    it('should throw an error if not a function', () => {
+      assert.throws(() => createApolloFetch().batchUse(<any>{}));
+    });
+
+    it('should get array GraphQLRequest and pass result to constructOptions', done => {
+      const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+
+      let receivedOpts;
+
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+        constructOptions: (request, options) => {
+          assert(Array.isArray(request));
+
+          const tmp = operations;
+          tmp.push(simpleQueryWithVar);
+
+          assert.deepEqual(operations, <any[]>request);
+
+          receivedOpts.headers = {};
+          receivedOpts.headers.stub = 'value';
+          assert.deepEqual(receivedOpts, options);
+          done();
+          return constructDefaultOptions(request, options);
+        },
+      });
+
+      apolloFetch.batchUse(({request, options}, next) => {
+        assert.deepEqual(request, operations);
+
+        request.push(simpleQueryWithVar);
+        receivedOpts = {...options};
+        options.headers = {};
+        options.headers.stub = 'value';
+
+        next();
+      });
+
+      apolloFetch(operations);
+    });
+  });
+
+  describe('batched Afterware', () => {
+    const data = {data: { hello: 'world', uri: '/graphql' }};
+    const batch = [data, data];
+    const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+
+    before(() => {
+      fetchMock.post('batch', batch);
+      fetchMock.post('401', 401);
+    });
+
+    afterEach(fetchMock.reset);
+    after(fetchMock.restore);
+
+    it('should throw an error if not a function', () => {
+      assert.throws(() => createApolloFetch().batchUseAfter(<any>{}));
+    });
+
+
+    it('should get array of results return modified result', () => {
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+      });
+
+      apolloFetch.batchUseAfter(({response, options}, next) => {
+        assert.deepEqual(response.parsed, batch);
+        assert.deepEqual(fetchMock.lastCall()[1], options);
+        assert(Array.isArray(response.parsed));
+        response.parsed.push(data);
+
+        next();
+      });
+
+      return apolloFetch(operations).then(results => {
+        const tmp = [...batch];
+        tmp.push(data);
+        assert.deepEqual(results, tmp);
+      });
+    });
+
+    it('should get access to the response status', done => {
+      const apolloFetch = createApolloFetch({
+        uri: '401',
+      });
+
+      apolloFetch.batchUseAfter(({response, options}, next) => {
+        assert.deepEqual(fetchMock.lastCall()[1], options);
+
+        assert.isUndefined(response.parsed);
+        assert.deepEqual(response.status, 401);
+        done();
+      });
+
+      apolloFetch(operations);
+    });
+  });
+
+  describe('constructOptions', () => {
+    const operation = simpleQueryWithNoVars;
+    const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
+    const opts = {
+      headers: {
+        stub: 'header',
+      },
+    };
+
+    it('should pass single GraphQLRequest to constructOptions and call fetch with result', done => {
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+        customFetch: (uri, options) => {
+          assert.deepEqual(uri, 'batch');
+          assert.deepEqual(options, opts);
+          return done();
+        },
+        constructOptions: (request, options) => {
+          assert.deepEqual(request, operation);
+
+          return {...opts};
+        },
+      });
+
+      apolloFetch(operation).catch(e => void 0);
+    });
+
+    it('should pass array of GraphQLRequest to constructOptions and call fetch with result', done => {
+      const apolloFetch = createApolloFetch({
+        uri: 'batch',
+        customFetch: (uri, options) => {
+          assert.deepEqual(uri, 'batch');
+          assert.deepEqual(options.body, JSON.stringify(operations));
+          delete options.body;
+          assert.deepEqual(options, opts);
+          throw done();
+        },
+        constructOptions: (request, options) => {
+          assert.deepEqual(request, operations);
+
+          return {...opts, body: JSON.stringify(request)};
+        },
+      });
+
+      apolloFetch(operations).catch(e => void 0);
     });
   });
 });
