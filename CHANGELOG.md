@@ -2,6 +2,9 @@
 
 ### vNEXT
 
+- Move repository to lerna project [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
+- Support batched requests [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
+
 ### 0.3.0
 
 Changes the middleware and afterware to accept functions instead of objects
