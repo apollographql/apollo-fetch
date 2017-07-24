@@ -16,7 +16,11 @@ import {
 } from './types';
 import 'isomorphic-fetch';
 
-type WareStack = MiddlewareInterface[] | BatchMiddlewareInterface[] | AfterwareInterface[] | BatchAfterwareInterface[];
+type WareStack =
+  | MiddlewareInterface[]
+  | BatchMiddlewareInterface[]
+  | AfterwareInterface[]
+  | BatchAfterwareInterface[];
 
 function buildWareStack<M>(funcs: WareStack, modifiedObject: M, resolve) {
   const next = () => {
@@ -32,12 +36,17 @@ function buildWareStack<M>(funcs: WareStack, modifiedObject: M, resolve) {
   next();
 }
 
-export function constructDefaultOptions(requestOrRequests: GraphQLRequest | GraphQLRequest[], options: RequestInit): RequestInit {
+export function constructDefaultOptions(
+  requestOrRequests: GraphQLRequest | GraphQLRequest[],
+  options: RequestInit,
+): RequestInit {
   let body;
   try {
     body = JSON.stringify(requestOrRequests);
   } catch (e) {
-    throw new Error(`Network request failed. Payload is not serializable: ${e.message}`);
+    throw new Error(
+      `Network request failed. Payload is not serializable: ${e.message}`,
+    );
   }
 
   return {
@@ -47,7 +56,7 @@ export function constructDefaultOptions(requestOrRequests: GraphQLRequest | Grap
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
-      ...(options.headers || []),
+      ...options.headers || [],
     },
   };
 }
@@ -55,7 +64,9 @@ export function constructDefaultOptions(requestOrRequests: GraphQLRequest | Grap
 function throwHttpError(response, error) {
   let httpError;
   if (response && response.status >= 300) {
-    httpError = new Error(`Network request failed with status ${response.status} - "${response.statusText}"`);
+    httpError = new Error(
+      `Network request failed with status ${response.status} - "${response.statusText}"`,
+    );
   } else {
     httpError = new Error(`Network request failed to return valid JSON`);
   }
@@ -73,14 +84,13 @@ function throwBatchError(response) {
 }
 
 export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
-  const {constructOptions, customFetch} = params;
+  const { constructOptions, customFetch } = params;
 
   const _uri = params.uri || '/graphql';
   const middlewares = [];
   const batchedMiddlewares = [];
   const afterwares = [];
   const batchedAfterwares = [];
-
 
   const applyMiddlewares = (
     requestAndOptions: RequestAndOptions | RequestsAndOptions,
@@ -95,7 +105,10 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     });
   };
 
-  const applyAfterwares = (responseObject: ResponseAndOptions, batched: boolean): Promise<ResponseAndOptions> => {
+  const applyAfterwares = (
+    responseObject: ResponseAndOptions,
+    batched: boolean,
+  ): Promise<ResponseAndOptions> => {
     return new Promise((resolve, reject) => {
       if (batched) {
         buildWareStack([...batchedAfterwares], responseObject, resolve);
@@ -105,50 +118,63 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     });
   };
 
-  const apolloFetch = function (request: GraphQLRequest | GraphQLRequest[]): Promise<FetchResult | FetchResult[]> {
+  const apolloFetch = function(
+    request: GraphQLRequest | GraphQLRequest[],
+  ): Promise<FetchResult | FetchResult[]> {
     let options = {};
     let parseError;
 
     const batched = Array.isArray(request);
 
-    const requestObject = <RequestAndOptions | RequestsAndOptions>(batched ? {
-      requests: request,
-      options,
-    } : {
-        request,
-        options,
-      });
+    const requestObject = <RequestAndOptions | RequestsAndOptions>(batched
+      ? {
+          requests: request,
+          options,
+        }
+      : {
+          request,
+          options,
+        });
 
     return applyMiddlewares(requestObject, batched)
-      .then((reqOpts) => {
-        const construct = (constructOptions || constructDefaultOptions);
-        const requestOrRequests = ((<RequestAndOptions>reqOpts).request || (<RequestsAndOptions>reqOpts).requests);
+      .then(reqOpts => {
+        const construct = constructOptions || constructDefaultOptions;
+        const requestOrRequests =
+          (<RequestAndOptions>reqOpts).request ||
+          (<RequestsAndOptions>reqOpts).requests;
         return construct(requestOrRequests, reqOpts.options);
       })
       .then(opts => {
         options = { ...opts };
         return (customFetch || fetch)(_uri, options);
       })
-      .then(response => response.text().then(raw => {
-        try {
-          const parsed = JSON.parse(raw);
-          (response as ParsedResponse).raw = raw;
-          (response as ParsedResponse).parsed = parsed;
-          return <ParsedResponse>response;
-        } catch (e) {
-          parseError = e;
+      .then(
+        response =>
+          response.text().then(raw => {
+            try {
+              const parsed = JSON.parse(raw);
+              (response as ParsedResponse).raw = raw;
+              (response as ParsedResponse).parsed = parsed;
+              return <ParsedResponse>response;
+            } catch (e) {
+              parseError = e;
 
-          //pass parsed raw response onto afterware
-          (response as ParsedResponse).raw = raw;
-          return <ParsedResponse>response;
-        }
-      }),
-      //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
-    )
-      .then(response => applyAfterwares({
-        response,
-        options,
-      }, batched))
+              //pass parsed raw response onto afterware
+              (response as ParsedResponse).raw = raw;
+              return <ParsedResponse>response;
+            }
+          }),
+        //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
+      )
+      .then(response =>
+        applyAfterwares(
+          {
+            response,
+            options,
+          },
+          batched,
+        ),
+      )
       .then(({ response }) => {
         if (response.parsed) {
           if (batched) {

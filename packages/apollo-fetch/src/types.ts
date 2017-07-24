@@ -19,8 +19,14 @@ export interface FetchResult {
   extensions?: any;
 }
 
-export type MiddlewareInterface = (request: RequestAndOptions, next: Function) => void;
-export type BatchMiddlewareInterface = (requests: RequestsAndOptions, next: Function) => void;
+export type MiddlewareInterface = (
+  request: RequestAndOptions,
+  next: Function,
+) => void;
+export type BatchMiddlewareInterface = (
+  requests: RequestsAndOptions,
+  next: Function,
+) => void;
 
 export interface RequestAndOptions {
   request: GraphQLRequest;
@@ -32,8 +38,14 @@ export interface RequestsAndOptions {
   options: RequestInit;
 }
 
-export type AfterwareInterface = (response: ResponseAndOptions, next: Function) => void;
-export type BatchAfterwareInterface = (response: ResponseAndOptions, next: Function) => void;
+export type AfterwareInterface = (
+  response: ResponseAndOptions,
+  next: Function,
+) => void;
+export type BatchAfterwareInterface = (
+  response: ResponseAndOptions,
+  next: Function,
+) => void;
 
 export interface ResponseAndOptions {
   response: ParsedResponse;
@@ -48,7 +60,10 @@ export interface ParsedResponse extends Response {
 export interface FetchOptions {
   uri?: string;
   customFetch?: (request: RequestInfo, init: RequestInit) => Promise<Response>;
-  constructOptions?: (requestOrRequests: GraphQLRequest | GraphQLRequest[], options: RequestInit) => RequestInit;
+  constructOptions?: (
+    requestOrRequests: GraphQLRequest | GraphQLRequest[],
+    options: RequestInit,
+  ) => RequestInit;
 }
 
 export interface FetchError extends Error {
