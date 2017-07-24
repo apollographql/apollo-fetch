@@ -699,10 +699,10 @@ describe('apollo-fetch', () => {
         },
       });
 
-      apolloFetch.batchUse(({request, options}, next) => {
-        assert.deepEqual(request, operations);
+      apolloFetch.batchUse(({requests, options}, next) => {
+        assert.deepEqual(requests, operations);
 
-        request.push(simpleQueryWithVar);
+        requests.push(simpleQueryWithVar);
         receivedOpts = {...options};
         options.headers = {};
         options.headers.stub = 'value';

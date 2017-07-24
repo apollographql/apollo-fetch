@@ -5,17 +5,18 @@ import {
   RequestsAndOptions,
   AfterwareInterface,
   MiddlewareInterface,
-  BatchedAfterwareInterface,
-  BatchedMiddlewareInterface,
+  BatchAfterwareInterface,
+  BatchMiddlewareInterface,
   FetchOptions,
   ApolloFetch,
   ParsedResponse,
   GraphQLRequest,
   FetchError,
+  BatchError,
 } from './types';
 import 'isomorphic-fetch';
 
-type WareStack = MiddlewareInterface[] | BatchedMiddlewareInterface[] | AfterwareInterface[] | BatchedAfterwareInterface[];
+type WareStack = MiddlewareInterface[] | BatchMiddlewareInterface[] | AfterwareInterface[] | BatchAfterwareInterface[];
 
 function buildWareStack<M>(funcs: WareStack, modifiedObject: M, resolve) {
   const next = () => {
@@ -31,10 +32,10 @@ function buildWareStack<M>(funcs: WareStack, modifiedObject: M, resolve) {
   next();
 }
 
-export function constructDefaultOptions(request: GraphQLRequest | GraphQLRequest[], options: RequestInit) {
+export function constructDefaultOptions(requestOrRequests: GraphQLRequest | GraphQLRequest[], options: RequestInit): RequestInit {
   let body;
   try {
-    body = JSON.stringify(request);
+    body = JSON.stringify(requestOrRequests);
   } catch (e) {
     throw new Error(`Network request failed. Payload is not serializable: ${e.message}`);
   }
@@ -68,7 +69,7 @@ function throwBatchError(response) {
   let httpError = new Error(`A batched Operation of responses for `);
   (httpError as any).response = response;
 
-  throw httpError as FetchError;
+  throw httpError as BatchError;
 }
 
 export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
@@ -111,13 +112,20 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
 
       const batched = Array.isArray(request);
 
-      const requestObject = <RequestAndOptions | RequestsAndOptions>{
+      const requestObject = <RequestAndOptions | RequestsAndOptions>(batched ? {
+        requests: request,
+        options,
+      } : {
         request,
         options,
-      };
+      });
 
       return applyMiddlewares(requestObject, batched)
-        .then(({ request: req, options: opt }) => (constructOptions || constructDefaultOptions)(req, opt))
+        .then((reqOpts) => {
+          const construct = (constructOptions || constructDefaultOptions);
+          const requestOrRequests = ((<RequestAndOptions>reqOpts).request || (<RequestsAndOptions>reqOpts).requests);
+          return construct(requestOrRequests, reqOpts.options);
+        })
         .then( opts => {
           options = {...opts};
           return (customFetch || fetch) (_uri, options);
@@ -174,7 +182,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
 
         return apolloFetch;
       },
-      batchUse: (middleware: BatchedMiddlewareInterface) => {
+      batchUse: (middleware: BatchMiddlewareInterface) => {
         if (typeof middleware === 'function') {
           batchedMiddlewares.push(middleware);
         } else {
@@ -183,7 +191,7 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
 
         return apolloFetch;
       },
-      batchUseAfter: (afterware: BatchedAfterwareInterface) => {
+      batchUseAfter: (afterware: BatchAfterwareInterface) => {
         if (typeof afterware === 'function') {
           batchedAfterwares.push(afterware);
         } else {

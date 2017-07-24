@@ -3,8 +3,8 @@ export interface ApolloFetch {
   (operation: GraphQLRequest[]): Promise<FetchResult[]>;
   use: (middlewares: MiddlewareInterface) => ApolloFetch;
   useAfter: (afterwares: AfterwareInterface) => ApolloFetch;
-  batchUse: (middlewares: BatchedMiddlewareInterface) => ApolloFetch;
-  batchUseAfter: (afterwares: BatchedAfterwareInterface) => ApolloFetch;
+  batchUse: (middlewares: BatchMiddlewareInterface) => ApolloFetch;
+  batchUseAfter: (afterwares: BatchAfterwareInterface) => ApolloFetch;
 }
 
 export interface GraphQLRequest {
@@ -20,7 +20,7 @@ export interface FetchResult {
 }
 
 export type MiddlewareInterface = (request: RequestAndOptions, next: Function) => void;
-export type BatchedMiddlewareInterface = (request: RequestsAndOptions, next: Function) => void;
+export type BatchMiddlewareInterface = (request: RequestsAndOptions, next: Function) => void;
 
 export interface RequestAndOptions {
   request: GraphQLRequest;
@@ -28,12 +28,12 @@ export interface RequestAndOptions {
 }
 
 export interface RequestsAndOptions {
-  request: GraphQLRequest[];
+  requests: GraphQLRequest[];
   options: RequestInit;
 }
 
 export type AfterwareInterface = (response: ResponseAndOptions, next: Function) => void;
-export type BatchedAfterwareInterface = (response: ResponseAndOptions, next: Function) => void;
+export type BatchAfterwareInterface = (response: ResponseAndOptions, next: Function) => void;
 
 export interface ResponseAndOptions {
   response: ParsedResponse;
@@ -48,10 +48,14 @@ export interface ParsedResponse extends Response {
 export interface FetchOptions {
   uri?: string;
   customFetch?: (request: RequestInfo, init: RequestInit) => Promise<Response>;
-  constructOptions?: (request: GraphQLRequest | GraphQLRequest[], options: RequestInit) => RequestInit;
+  constructOptions?: (requestOrRequests: GraphQLRequest | GraphQLRequest[], options: RequestInit) => RequestInit;
 }
 
 export interface FetchError extends Error {
   response: ParsedResponse;
   parseError?: Error;
+}
+
+export interface BatchError extends Error {
+  response: ParsedResponse;
 }
