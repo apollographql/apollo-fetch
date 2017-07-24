@@ -58,8 +58,6 @@
     "typescript": "^2.2.1"
   },
   "nyc": {
-    "exclude": [
-      "tests"
-    ]
+    "exclude": ["tests"]
   }
 }

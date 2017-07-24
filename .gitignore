@@ -48,3 +48,7 @@ jspm_packages
 
 # 
 dist
+
+# lockfiles
+yarn.lock
+package-lock.json
