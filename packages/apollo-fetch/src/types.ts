@@ -20,7 +20,7 @@ export interface FetchResult {
 }
 
 export type MiddlewareInterface = (request: RequestAndOptions, next: Function) => void;
-export type BatchMiddlewareInterface = (request: RequestsAndOptions, next: Function) => void;
+export type BatchMiddlewareInterface = (requests: RequestsAndOptions, next: Function) => void;
 
 export interface RequestAndOptions {
   request: GraphQLRequest;

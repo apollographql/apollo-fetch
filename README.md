@@ -1,12 +1,11 @@
 # apollo-fetch [![npm version](https://badge.fury.io/js/apollo-fetch.svg)](https://badge.fury.io/js/apollo-fetch) [![Get on Slack](https://img.shields.io/badge/slack-join-orange.svg)](http://www.apollostack.com/#slack)
 
 
-`apollo-fetch` is a lightweight client for single and batched GraphQL requests that supports middleware and afterware that modify requests and responses.
+`apollo-fetch` is a lightweight client for GraphQL requests that supports middleware and afterware that modify requests and responses.
 
 By default `apollo-fetch` uses `isomorphic-fetch`, but you have the option of using a custom fetch function.
-Additionally, `apollo-fetch` allows specification of how GraphQL requests are included in fetch options.
 
-If you are interested in contributing, please read the [documentation](docs/monorepo.md) on repository structure and [Contributor Guide](CONTRIBUTING.md).
+If you are interested in contributing, please read the [documentation on repository structure](docs/monorepo.md) and [Contributor Guide](CONTRIBUTING.md).
 
 # Installation
 
@@ -84,21 +83,23 @@ To modify how GraphQL requests are incorporated in the fetch options, you may pa
 These transformations can be useful for servers that have different formatting for batches or other extra capabilities.
 
 ```js
-const constructOptions = (requestOrRequests, init) => {
+//requestOrRequests: GraphQLRequest | GraphQLRequest[]
+//options: RequestInit
+const constructOptions = (requestOrRequests, options) => {
   return {
-    ...init,
+    ...options,
     body: JSON.stringify(requestOrRequests),
   }
 };
 const apolloFetch = createApolloFetch({ constructOptions });
 
 //simplified usage inside apolloFetch
-fetch(uri, constructOptions(request, options)) //options are result of middleware
+fetch(uri, constructOptions(requestOrRequests, options)); //requestOrRequests and options are the results from middleware
 ```
 
 ### Batched Requests
 
-Batched requests are also supported by the fetch function returned by `createApolloFetch`, please refer the batched request [guide](docs/batch.md) for a complete description.
+Batched requests are also supported by the fetch function returned by `createApolloFetch`, please refer the [batched request guide](docs/batch.md) for a complete description.
 
 # Examples
 
@@ -294,14 +295,16 @@ FetchOptions {
 ```
 
 `ApolloFetch`, a fetch function with middleware, afterware, and batched request capabilities.
-For information on batch usage, see this [guide](docs/batch.md).
+For information on batch usage, see the [batched request documentation](docs/batch.md).
 
 ```js
 ApolloFetch {
   (operation: GraphQLRequest): Promise<FetchResult>;
-  (operation: GraphQLRequest[]): Promise<FetchResult[]>;
   use: (middlewares: MiddlewareInterface) => ApolloFetch;
   useAfter: (afterwares: AfterwareInterface) => ApolloFetch;
+
+  //Batched requests are described in the docs/batch.md
+  (operation: GraphQLRequest[]): Promise<FetchResult[]>;
   batchUse: (middlewares: BatchMiddlewareInterface) => ApolloFetch;
   batchUseAfter: (afterwares: BatchAfterwareInterface) => ApolloFetch;
 }

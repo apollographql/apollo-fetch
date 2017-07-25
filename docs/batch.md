@@ -22,9 +22,9 @@ apolloFetch([request, request])
   });
 ```
 
-Batched middleware and afterware are added to an `ApolloFetch` with `batchUse` and `batchUseAfter`.
+Batch middleware and afterware are added to an `ApolloFetch` with `batchUse` and `batchUseAfter`.
 Middleware has access to the array of requests in `request`.
-Afterware has access to the single network response, which contains the array of GraphQL results in `parsed`.
+Afterware has access to the single network response, which should contain an array of GraphQL results in `parsed`.
 
 ```js
 const apolloFetch = createApolloFetch();
@@ -37,7 +37,7 @@ apolloFetch.batchUse(batchMiddleware);
 apolloFetch.batchUseAfter(batchAfterware);
 ```
 
-Batched middleware and afterware exhibit the same chaining semantics as the single request variant.
+Batch middleware and afterware exhibit the same chaining semantics as the single request variant.
 
 ```js
 const apolloFetch = createApolloFetch();
@@ -51,17 +51,41 @@ apolloFetch
 
 ### Batch Formatting
 
-Since GraphQL does not include batched requests in the formal spec, `apollo-fetch` creates a request that is compatible with [`apollo-server`](https://github.com/apollographql/apollo-server).
-The default behavior of translating a GraphQL request into the fetch options, a simple `JSON.stringify(requestOrRequests)`, is found in `constructDefaultOptions`.
+Not all GraphQL servers support batching out of the box, so `apollo-fetch` creates a request that is compatible with [`apollo-server`](https://github.com/apollographql/apollo-server).
+The default behavior of translating a GraphQL request into fetch options, a simple `JSON.stringify(requestOrRequests)`, is found in `constructDefaultOptions`.
 
 For other formatting needs, `createApolloFetch` accepts a `constructOptions` parameter that will set the options that are passed to the underlying `fetch` function.
+This is an example of another batch format, where the array of requests is broken into separate arrays for queries and variables and then `stringify`'d.
+
+```js
+import {
+  constructDefaultOptions,
+} from 'apollo-fetch';
+
+function constructOptions(requestOrRequests, options){
+  if(Array.isArray(requestOrRequests)) {
+    //custom batching
+    const requests = {
+      queries: requestOrRequests.map(req => req.query),
+      variables:requestOrRequests.map(req => req.variables),
+    };
+    return {
+      ...options,
+      body: JSON.stringify(requests),
+    }
+  } else {
+    //single requests
+    return constructDefaultOptions(requestOrRequests, options);
+  }
+}
+```
 
 ### Error Handling
 
 Errors are handled in the same manner as a single request, so all responses are passed to afterware including network errors.
 An additional error, `BatchError`, is thrown when the `parsed` property of the `ParsedResponse` returned from afterware is not an array.
 
-## Batched API
+## Batch API
 
 ```js
 ApolloFetch {
@@ -71,10 +95,10 @@ ApolloFetch {
 }
 ```
 
-Batched Middleware used by `ApolloFetch`
+Batch Middleware used by `ApolloFetch`
 
 ```js
-BatchMiddlewareInterface: (request: RequestsAndOptions, next: Function) => void
+BatchMiddlewareInterface: (requests: RequestsAndOptions, next: Function) => void
 
 RequestsAndOptions {
   requests: GraphQLRequest[];
@@ -82,7 +106,7 @@ RequestsAndOptions {
 }
 ```
 
-Batched Afterware used by `ApolloFetch` has access to the Response.
+Batch Afterware used by `ApolloFetch` has access to the Response.
 
 ```js
 BatchAfterwareInterface: (response: ResponseAndOptions, next: Function) => void
