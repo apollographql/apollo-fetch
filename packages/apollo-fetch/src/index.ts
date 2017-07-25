@@ -5,10 +5,14 @@ import {
 
 import {
   createApolloFetch,
+  constructDefaultOptions,
 } from './apollo-fetch';
 
 export {
   createApolloFetch,
+  constructDefaultOptions,
+
+  //Types
   ApolloFetch,
   GraphQLRequest,
 };

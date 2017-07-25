@@ -14,14 +14,13 @@
         },
         {
             "taskName": "watch-tsc",
-            "command": "tsc",
+            "command": "lerna",
             "isShellCommand": true,
             "isBuildCommand": true,
             "isBackground": true,
             "args": [
-                "-w",
-                "-p",
-                "."
+                "run",
+                "watch"
             ],
             "showOutput": "always",
             "problemMatcher": "$tsc-watch"
