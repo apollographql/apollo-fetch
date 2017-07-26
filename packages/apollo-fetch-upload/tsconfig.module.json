@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "module": "es6",
+    "declaration": false,
+    "outDir": "dist/module"
+  }
+}
