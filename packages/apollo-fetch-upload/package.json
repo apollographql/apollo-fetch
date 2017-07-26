@@ -2,24 +2,24 @@
   "name": "apollo-fetch-upload",
   "version": "1.0.0",
   "description": "Allows files to be used in GraphQL requests with apollo-fetch.",
-  "author": "Jayden Seric <me@jaydenseric.com>",
   "license": "MIT",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "author": "Jayden Seric <me@jaydenseric.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch-upload"
   },
-  "bugs": {
-    "url": "https://github.com/apollographql/apollo-fetch/issues"
-  },
   "homepage": "https://github.com/apollographql/apollo-fetch#readme",
+  "bugs": "https://github.com/apollographql/apollo-fetch/issues",
+  "types": "./dist/main/index.d.ts",
+  "main": "./dist/main/index.js",
+  "module": "./dist/module/index.js",
   "scripts": {
-    "lint": "tslint --type-check -p tsconfig.json src/*.ts",
+    "lint": "tslint --type-check -p tsconfig.json",
     "clean": "rimraf dist/*",
     "prebuild": "npm run clean",
-    "build": "tsc",
-    "watch": "npm run build -- -w",
+    "build": "npm run build:main && npm run build:module",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
     "prepublishOnly": "npm run lint && npm run clean && npm run build"
   },
   "dependencies": {
