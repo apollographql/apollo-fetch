@@ -1,11 +1,16 @@
 import {
-  ApolloFetch,
   createApolloFetch,
   constructDefaultOptions,
+  // Types:
+  ApolloFetch,
+  GraphQLRequest,
 } from 'apollo-fetch';
 import { extractFiles } from 'extract-files';
 
-export function constructUploadOptions(requestOrRequests, options) {
+export function constructUploadOptions(
+  requestOrRequests: GraphQLRequest | GraphQLRequest[],
+  options: RequestInit,
+): RequestInit {
   const files = extractFiles(requestOrRequests);
 
   if (files.length) {
@@ -24,7 +29,7 @@ export function constructUploadOptions(requestOrRequests, options) {
   return constructDefaultOptions(requestOrRequests, options);
 }
 
-export function createApolloFetchUpload(params): ApolloFetch {
+export function createApolloFetchUpload(params = {}): ApolloFetch {
   return createApolloFetch({
     ...params,
     constructOptions: constructUploadOptions,
