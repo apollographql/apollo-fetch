@@ -105,103 +105,106 @@ export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
     });
   };
 
-  const apolloFetch: ApolloFetch = <ApolloFetch>Object.assign(
-    function (request: GraphQLRequest | GraphQLRequest[]): Promise<FetchResult | FetchResult[]> {
-      let options = {};
-      let parseError;
+  const apolloFetch = function (request: GraphQLRequest | GraphQLRequest[]): Promise<FetchResult | FetchResult[]> {
+    let options = {};
+    let parseError;
 
-      const batched = Array.isArray(request);
+    const batched = Array.isArray(request);
 
-      const requestObject = <RequestAndOptions | RequestsAndOptions>(batched ? {
-        requests: request,
-        options,
-      } : {
+    const requestObject = <RequestAndOptions | RequestsAndOptions>(batched ? {
+      requests: request,
+      options,
+    } : {
         request,
         options,
       });
 
-      return applyMiddlewares(requestObject, batched)
-        .then((reqOpts) => {
-          const construct = (constructOptions || constructDefaultOptions);
-          const requestOrRequests = ((<RequestAndOptions>reqOpts).request || (<RequestsAndOptions>reqOpts).requests);
-          return construct(requestOrRequests, reqOpts.options);
-        })
-        .then( opts => {
-          options = {...opts};
-          return (customFetch || fetch) (_uri, options);
-        })
-        .then( response => response.text().then( raw => {
-            try {
-              const parsed = JSON.parse(raw);
-              return <ParsedResponse>{ ...response, raw, parsed };
-            } catch (e) {
-              parseError = e;
+    return applyMiddlewares(requestObject, batched)
+      .then((reqOpts) => {
+        const construct = (constructOptions || constructDefaultOptions);
+        const requestOrRequests = ((<RequestAndOptions>reqOpts).request || (<RequestsAndOptions>reqOpts).requests);
+        return construct(requestOrRequests, reqOpts.options);
+      })
+      .then(opts => {
+        options = { ...opts };
+        return (customFetch || fetch)(_uri, options);
+      })
+      .then(response => response.text().then(raw => {
+        try {
+          const parsed = JSON.parse(raw);
+          (response as ParsedResponse).raw = raw;
+          (response as ParsedResponse).parsed = parsed;
+          return <ParsedResponse>response;
+        } catch (e) {
+          parseError = e;
 
-              //pass parsed raw response onto afterware
-              return <ParsedResponse>{ ...response, raw };
-            }
-          }),
-          //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
-        )
-        .then(response => applyAfterwares({
-          response,
-          options,
-        }, batched))
-        .then(({ response }) => {
-          if (response.parsed) {
-            if (batched) {
-              if (Array.isArray(response.parsed)) {
-                return response.parsed as FetchResult[];
-              } else {
-                throwBatchError(response);
-              }
+          //pass parsed raw response onto afterware
+          (response as ParsedResponse).raw = raw;
+          return <ParsedResponse>response;
+        }
+      }),
+      //.catch() this should never happen: https://developer.mozilla.org/en-US/docs/Web/API/Body/text
+    )
+      .then(response => applyAfterwares({
+        response,
+        options,
+      }, batched))
+      .then(({ response }) => {
+        if (response.parsed) {
+          if (batched) {
+            if (Array.isArray(response.parsed)) {
+              return response.parsed as FetchResult[];
             } else {
-              return { ...response.parsed };
+              throwBatchError(response);
             }
           } else {
-            throwHttpError(response, parseError);
+            return { ...response.parsed };
           }
-        });
-    },
-    {
-      use: (middleware: MiddlewareInterface) => {
-        if (typeof middleware === 'function') {
-          middlewares.push(middleware);
         } else {
-          throw new Error('Middleware must be a function');
+          throwHttpError(response, parseError);
         }
+      });
+  };
 
-        return apolloFetch;
-      },
-      useAfter: (afterware: AfterwareInterface) => {
-        if (typeof afterware === 'function') {
-          afterwares.push(afterware);
-        } else {
-          throw new Error('Afterware must be a function');
-        }
+  (apolloFetch as any).use = (middleware: MiddlewareInterface) => {
+    if (typeof middleware === 'function') {
+      middlewares.push(middleware);
+    } else {
+      throw new Error('Middleware must be a function');
+    }
 
-        return apolloFetch;
-      },
-      batchUse: (middleware: BatchMiddlewareInterface) => {
-        if (typeof middleware === 'function') {
-          batchedMiddlewares.push(middleware);
-        } else {
-          throw new Error('Middleware must be a function');
-        }
+    return apolloFetch;
+  };
 
-        return apolloFetch;
-      },
-      batchUseAfter: (afterware: BatchAfterwareInterface) => {
-        if (typeof afterware === 'function') {
-          batchedAfterwares.push(afterware);
-        } else {
-          throw new Error('Afterware must be a function');
-        }
+  (apolloFetch as any).useAfter = (afterware: AfterwareInterface) => {
+    if (typeof afterware === 'function') {
+      afterwares.push(afterware);
+    } else {
+      throw new Error('Afterware must be a function');
+    }
 
-        return apolloFetch;
-      },
-    },
-  );
+    return apolloFetch;
+  };
+
+  (apolloFetch as any).batchUse = (middleware: BatchMiddlewareInterface) => {
+    if (typeof middleware === 'function') {
+      batchedMiddlewares.push(middleware);
+    } else {
+      throw new Error('Middleware must be a function');
+    }
+
+    return apolloFetch;
+  };
+
+  (apolloFetch as any).batchUseAfter = (afterware: BatchAfterwareInterface) => {
+    if (typeof afterware === 'function') {
+      batchedAfterwares.push(afterware);
+    } else {
+      throw new Error('Afterware must be a function');
+    }
+
+    return apolloFetch;
+  };
 
   return apolloFetch as ApolloFetch;
 }
