@@ -277,6 +277,7 @@ const client = new ApolloClient({
 # API
 
 `createApolloFetch` is a factory for `ApolloFetch`, a fetch function with middleware and afterware capabilities.
+[`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) and [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request) follow the MDN standard fetch API.
 
 ```js
 createApolloFetch(options: FetchOptions): ApolloFetch

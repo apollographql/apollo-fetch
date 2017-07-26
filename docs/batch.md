@@ -87,15 +87,23 @@ An additional error, `BatchError`, is thrown when the `parsed` property of the `
 
 ## Batch API
 
+`ApolloFetch` supports batched requests with middleware and afterware.
+
 ```js
 ApolloFetch {
   (operation: GraphQLRequest[]): Promise<FetchResult[]>;
   batchUse: (middlewares: BatchMiddlewareInterface) => ApolloFetch;
   batchUseAfter: (afterwares: BatchAfterwareInterface) => ApolloFetch;
+
+  //Single Requests
+  (operation: GraphQLRequest): Promise<FetchResult>;
+  use: (middlewares: MiddlewareInterface) => ApolloFetch;
+  useAfter: (afterwares: AfterwareInterface) => ApolloFetch;
 }
 ```
 
-Batch Middleware used by `ApolloFetch`
+Batch Middleware used by `ApolloFetch` has access to the requests and options passed to `constructOptions`.
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request) follow the MDN standard fetch API.
 
 ```js
 BatchMiddlewareInterface: (requests: RequestsAndOptions, next: Function) => void
@@ -106,7 +114,7 @@ RequestsAndOptions {
 }
 ```
 
-Batch Afterware used by `ApolloFetch` has access to the Response.
+Batch Afterware used by `ApolloFetch` has access to the single Response.
 
 ```js
 BatchAfterwareInterface: (response: ResponseAndOptions, next: Function) => void
