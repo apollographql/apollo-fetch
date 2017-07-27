@@ -5,7 +5,8 @@
   "author": "Evans Hauser <evanshauser@gmail.com>",
   "contributors": [
     "Jonas Helfer <jonas@helfer.email>",
-    "Sashko Stubailo <sashko@stubailo.com>"
+    "Sashko Stubailo <sashko@stubailo.com>",
+    "Jayden Seric <me@jaydenseric.com>"
   ],
   "license": "MIT",
   "main": "./dist/src/index.js",
