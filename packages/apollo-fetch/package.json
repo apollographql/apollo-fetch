@@ -1,6 +1,6 @@
 {
   "name": "apollo-fetch",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Lightweight implementation of fetch for GraphQL requests",
   "author": "Evans Hauser <evanshauser@gmail.com>",
   "contributors": [
@@ -41,6 +41,7 @@
     "clean": "npm run clean:dist && npm run clean:coverage",
     "clean:dist": "rimraf dist/*",
     "clean:coverage": "rimraf coverage/*",
+    "prepublish": "npm run clean && npm run build",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {

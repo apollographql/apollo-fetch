@@ -63,6 +63,7 @@
       "clean",
       "clean,dist",
       "clean,coverage",
+      "prepublish",
       "prepublishOnly"
     ]
   }

@@ -2,9 +2,17 @@
 
 ### vNEXT
 
-### 0.5.1
+### 0.6.0
 
 - Adds support for UMD and ES2015 modules (tree-shaking) [PR #9](https://github.com/apollographql/apollo-fetch/pull/9)
+
+### 0.5.2
+
+- Rollback 0.5.1
+
+### 0.5.1
+
+- Broken build
 
 ### 0.5.0
 

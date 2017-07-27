@@ -2,7 +2,9 @@ export default {
   entry: 'dist/index.js',
   dest: 'dist/bundle.umd.js',
   format: 'umd',
+  sourceMap: true,
   moduleName: 'apolloFetch',
+  exports: 'named',
   onwarn
 };
 
