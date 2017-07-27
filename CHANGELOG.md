@@ -2,6 +2,8 @@
 
 ### vNEXT
 
+### 0.4.0
+
 - Move repository to lerna project [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
 - Support batched requests [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
 
