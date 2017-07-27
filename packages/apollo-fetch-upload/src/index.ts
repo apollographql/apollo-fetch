@@ -1,8 +1,9 @@
 import {
-  createApolloFetch,
   constructDefaultOptions,
+  createApolloFetch,
   // Types:
   ApolloFetch,
+  FetchOptions,
   GraphQLRequest,
 } from 'apollo-fetch';
 import { ReactNativeFile, extractFiles } from 'extract-files';
@@ -31,7 +32,7 @@ export function constructUploadOptions(
   return constructDefaultOptions(requestOrRequests, options);
 }
 
-export function createApolloFetchUpload(params = {}): ApolloFetch {
+export function createApolloFetchUpload(params: FetchOptions = {}): ApolloFetch {
   return createApolloFetch({
     ...params,
     constructOptions: constructUploadOptions,
