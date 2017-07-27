@@ -5,7 +5,9 @@ import {
   ApolloFetch,
   GraphQLRequest,
 } from 'apollo-fetch';
-import { extractFiles } from 'extract-files';
+import { ReactNativeFile, extractFiles } from 'extract-files';
+
+export { ReactNativeFile };
 
 export function constructUploadOptions(
   requestOrRequests: GraphQLRequest | GraphQLRequest[],
