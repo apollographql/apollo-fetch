@@ -2,6 +2,8 @@
 
 ### vNEXT
 
+### 0.5.0
+
 - Export all TypeScript types. [PR #13](https://github.com/apollographql/apollo-fetch/pull/13)
 
 ### 0.4.0
