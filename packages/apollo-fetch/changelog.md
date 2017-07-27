@@ -1,5 +1,9 @@
 # apollo-fetch change log
 
+## next
+
+- Change log moved into the published package. [PR #16](https://github.com/apollographql/apollo-fetch/pull/16)
+
 ## 0.4.0
 
 - Converted the repository to a [Lerna](https://github.com/lerna/lerna) project. [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
