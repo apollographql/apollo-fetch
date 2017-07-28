@@ -1,7 +1,9 @@
-dist/tests/
 src/
 tests/
 .travis.yml
+rollup.config.js
 tsconfig.json
+tsconfig.base.json
+tsconfig.test.json
 tslint.json
 typings.d.ts
