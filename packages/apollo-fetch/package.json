@@ -62,7 +62,7 @@
     "nyc": "11.1.0",
     "rimraf": "2.6.1",
     "rollup": "0.45.2",
-    "sinon": "2.4.1",
+    "sinon": "3.0.0",
     "source-map-support": "0.4.15",
     "tslint": "5.5.0",
     "typescript": "2.4.2"
