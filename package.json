@@ -38,7 +38,7 @@
     "pre-commit": "1.2.2",
     "prettier": "1.5.3",
     "rimraf": "2.6.1",
-    "sinon": "2.4.1",
+    "sinon": "3.0.0",
     "source-map-support": "0.4.15",
     "tslint": "5.5.0",
     "typescript": "2.4.2"
