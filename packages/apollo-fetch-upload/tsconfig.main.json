@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "dist/module",
+    "outDir": "dist/main",
     "target": "es5",
-    "module": "es6",
-    "moduleResolution": "node",
+    "declaration": true,
     "sourceMap": true,
     "removeComments": true,
     "noUnusedLocals": true,
