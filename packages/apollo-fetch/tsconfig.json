@@ -1,6 +1,4 @@
 {
   "extends": "./tsconfig.base",
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["fetch-ponyfill.typings.d.ts", "src/**/*.ts"]
 }

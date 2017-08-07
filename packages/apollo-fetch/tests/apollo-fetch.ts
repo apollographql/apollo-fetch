@@ -4,12 +4,20 @@ import * as sinon from 'sinon';
 import { isEqual } from 'lodash';
 import gql from 'graphql-tag';
 import { print } from 'graphql';
-import * as fetchMock from 'fetch-mock';
+import * as fetchMockModule from 'fetch-mock';
 import {
   createApolloFetch,
   constructDefaultOptions,
 } from '../src/apollo-fetch';
 import { RequestAndOptions, FetchResult } from '../src/types';
+
+import * as fetchPonyfill_ from 'fetch-ponyfill';
+// Trick rollup, see:
+// https://github.com/rollup/rollup/issues/670#issuecomment-284621537
+const fetchPonyfill = fetchPonyfill_;
+const { Response } = fetchPonyfill();
+
+const fetchMock = fetchMockModule.sandbox();
 
 chai.use(chaiAsPromised);
 
@@ -168,7 +176,7 @@ describe('apollo-fetch', () => {
     });
 
     it('should call fetch', () => {
-      const fetcher = createApolloFetch();
+      const fetcher = createApolloFetch({ customFetch: fetchMock });
       const result = fetcher({ query: print(sampleQuery) });
       return result.then(response => {
         assert.deepEqual(fetchMock.calls('/graphql').length, 1);
@@ -197,13 +205,13 @@ describe('apollo-fetch', () => {
 
     it('should call fetch with correct arguments and result', () => {
       const uri = 'test';
-      const fetcher = createApolloFetch({ uri });
+      const fetcher = createApolloFetch({ uri, customFetch: fetchMock });
       return callAndCheckFetch(uri, fetcher);
     });
 
     it('should make two successful requests', () => {
       const uri = 'test';
-      const fetcher = createApolloFetch({ uri });
+      const fetcher = createApolloFetch({ uri, customFetch: fetchMock });
       return callAndCheckFetch(uri, fetcher).then(() =>
         callAndCheckFetch(uri, fetcher),
       );
@@ -211,7 +219,7 @@ describe('apollo-fetch', () => {
 
     it('should pass an error onto the Promise', () => {
       const uri = 'error';
-      const fetcher = createApolloFetch({ uri, customFetch: fetch });
+      const fetcher = createApolloFetch({ uri, customFetch: fetchMock });
       const result = fetcher({ query: print(sampleQuery) });
       return assert.isRejected(
         result,
@@ -221,7 +229,10 @@ describe('apollo-fetch', () => {
     });
 
     it('should catch on a network error', () => {
-      const fetcher = createApolloFetch({ uri: forbiddenUrl });
+      const fetcher = createApolloFetch({
+        uri: forbiddenUrl,
+        customFetch: fetchMock,
+      });
       const result = fetcher({ query: print(sampleQuery) });
       return result.then(expect.fail).catch(error => {
         assert.deepEqual(
@@ -234,7 +245,10 @@ describe('apollo-fetch', () => {
     });
 
     it('should return a fail to parse response when fetch returns raw response', () => {
-      const fetcher = createApolloFetch({ uri: '/raw' });
+      const fetcher = createApolloFetch({
+        uri: '/raw',
+        customFetch: fetchMock,
+      });
       const result = fetcher({ query: print(sampleQuery) });
       return result.then(expect.fail).catch(error => {
         assert.deepEqual(
@@ -287,7 +301,10 @@ describe('apollo-fetch', () => {
     });
 
     it('should return errors thrown in middlewares', () => {
-      const apolloFetch = createApolloFetch({ uri: swapiUrl });
+      const apolloFetch = createApolloFetch({
+        uri: swapiUrl,
+        customFetch: fetchMock,
+      });
       apolloFetch.use(() => {
         throw Error('Middleware error');
       });
@@ -308,7 +325,10 @@ describe('apollo-fetch', () => {
     it('can alter the request variables', () => {
       const testWare1 = TestWare([{ key: 'personNum', val: 1 }]);
 
-      const swapi = createApolloFetch({ uri: swapiUrl });
+      const swapi = createApolloFetch({
+        uri: swapiUrl,
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1);
       // this is a stub for the end user client api
       const simpleRequest = {
@@ -323,7 +343,10 @@ describe('apollo-fetch', () => {
     it('can alter the options', () => {
       const testWare1 = TestWare([], [{ key: 'planet', val: 'mars' }]);
 
-      const swapi = createApolloFetch({ uri: swapiUrl });
+      const swapi = createApolloFetch({
+        uri: swapiUrl,
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1);
       // this is a stub for the end user client api
       const simpleRequest = {
@@ -344,7 +367,10 @@ describe('apollo-fetch', () => {
         [{ key: 'newParam', val: '0123456789' }],
       );
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1);
       const simpleRequest = {
         query: print(simpleQueryWithVar),
@@ -370,7 +396,10 @@ describe('apollo-fetch', () => {
       const testWare1 = TestWare([{ key: 'personNum', val: 1 }]);
       const testWare2 = TestWare([{ key: 'filmNum', val: 1 }]);
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1).use(testWare2);
       // this is a stub for the end user client api
       const simpleRequest = {
@@ -386,7 +415,10 @@ describe('apollo-fetch', () => {
       const testWare1 = TestWare([{ key: 'personNum', val: 1 }]);
       const testWare2 = TestWare([{ key: 'filmNum', val: 1 }]);
 
-      const swapi = createApolloFetch({ uri: swapiUrl });
+      const swapi = createApolloFetch({
+        uri: swapiUrl,
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1).use(testWare2);
       const simpleRequest = {
         query: print(complexQueryWithTwoVars),
@@ -408,7 +440,10 @@ describe('apollo-fetch', () => {
     after(fetchMock.restore);
 
     it('should return errors thrown in afterwares', () => {
-      const apolloFetch = createApolloFetch({ uri: swapiUrl });
+      const apolloFetch = createApolloFetch({
+        uri: swapiUrl,
+        customFetch: fetchMock,
+      });
       apolloFetch.useAfter(() => {
         throw Error('Afterware error');
       });
@@ -428,7 +463,10 @@ describe('apollo-fetch', () => {
 
     it('should throw an error if afterware is not a function', () => {
       const malWare = {} as any;
-      const apolloFetch = createApolloFetch({ uri: '/graphql' });
+      const apolloFetch = createApolloFetch({
+        uri: '/graphql',
+        customFetch: fetchMock,
+      });
 
       try {
         apolloFetch.useAfter(malWare);
@@ -452,7 +490,10 @@ describe('apollo-fetch', () => {
         response.parsed = parsedData;
         next();
       };
-      const apolloFetch = createApolloFetch({ uri: forbiddenUrl });
+      const apolloFetch = createApolloFetch({
+        uri: forbiddenUrl,
+        customFetch: fetchMock,
+      });
 
       apolloFetch.useAfter(afterware);
 
@@ -474,7 +515,10 @@ describe('apollo-fetch', () => {
         next();
       };
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi.useAfter(afterware1);
       swapi.useAfter(afterware2);
       // this is a stub for the end user client api
@@ -508,7 +552,10 @@ describe('apollo-fetch', () => {
       const testWare1 = TestWare([{ key: 'personNum', val: 1 }]);
       const testWare2 = TestWare([{ key: 'filmNum', val: 1 }]);
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi.use(testWare1).use(testWare2);
       // this is a stub for the end user client api
       const simpleRequest = {
@@ -537,7 +584,10 @@ describe('apollo-fetch', () => {
         next();
       };
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi.useAfter(afterware1).useAfter(afterware2);
       // this is a stub for the end user client api
       const simpleRequest = {
@@ -579,7 +629,10 @@ describe('apollo-fetch', () => {
         next();
       };
 
-      const swapi = createApolloFetch({ uri: 'http://graphql-swapi.test/' });
+      const swapi = createApolloFetch({
+        uri: 'http://graphql-swapi.test/',
+        customFetch: fetchMock,
+      });
       swapi
         .useAfter(afterware1)
         .useAfter(afterware2)
@@ -623,6 +676,7 @@ describe('apollo-fetch', () => {
     it('should call Fetch with GraphQLRequest Array and return the array of FetchResults', () => {
       const apolloFetch = createApolloFetch({
         uri: 'batch',
+        customFetch: fetchMock,
       });
 
       const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
@@ -641,6 +695,7 @@ describe('apollo-fetch', () => {
     it('should call Fetch with GraphQLRequest Array and return the array of FetchResults', () => {
       const apolloFetch = createApolloFetch({
         uri: 'batch',
+        customFetch: fetchMock,
       });
 
       const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
@@ -659,6 +714,7 @@ describe('apollo-fetch', () => {
     it('should throw an error if response is not an array', done => {
       const apolloFetch = createApolloFetch({
         uri: 'failed batch',
+        customFetch: fetchMock,
       });
 
       const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
@@ -732,6 +788,7 @@ describe('apollo-fetch', () => {
     it('should get array of results return modified result', () => {
       const apolloFetch = createApolloFetch({
         uri: 'batch',
+        customFetch: fetchMock,
       });
 
       apolloFetch.batchUseAfter(({ response, options }, next) => {
@@ -753,6 +810,7 @@ describe('apollo-fetch', () => {
     it('should get access to the response status', done => {
       const apolloFetch = createApolloFetch({
         uri: '401',
+        customFetch: fetchMock,
       });
 
       apolloFetch.batchUseAfter(({ response, options }, next) => {

@@ -2,6 +2,7 @@
 
 ## next
 
+- Use `fetch-ponyfill` instead of `isomorphic-fetch` [PR #23](https://github.com/apollographql/apollo-fetch/pull/23)
 - Change log moved into the published package. [PR #16](https://github.com/apollographql/apollo-fetch/pull/16)
 
 ## 0.6.0
