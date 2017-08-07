@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "lint": "tslint --type-check -p tsconfig.json",
-    "clean": "rimraf dist/*",
+    "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "npm run build:main && npm run build:module",
     "build:main": "tsc -p tsconfig.json",
