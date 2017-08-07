@@ -4,6 +4,22 @@
 
 - Change log moved into the published package. [PR #16](https://github.com/apollographql/apollo-fetch/pull/16)
 
+## 0.6.0
+
+- Added support for UMD and ES2015 modules for tree-shaking. [PR #9](https://github.com/apollographql/apollo-fetch/pull/9)
+
+## 0.5.2
+
+- Reverted v0.5.1.
+
+## 0.5.1
+
+- Fixed the build.
+
+## 0.5.0
+
+- Export all TypeScript types. [PR #13](https://github.com/apollographql/apollo-fetch/pull/13)
+
 ## 0.4.0
 
 - Converted the repository to a [Lerna](https://github.com/lerna/lerna) project. [PR #10](https://github.com/apollographql/apollo-fetch/pull/10)
