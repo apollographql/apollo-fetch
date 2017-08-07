@@ -13,6 +13,10 @@
   "types": "./dist/main/index.d.ts",
   "main": "./dist/main/index.js",
   "module": "./dist/module/index.js",
+  "files": [
+    "src",
+    "dist"
+  ],
   "scripts": {
     "lint": "tslint --type-check -p tsconfig.json",
     "clean": "rimraf dist/*",
