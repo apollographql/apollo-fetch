@@ -18,21 +18,23 @@
     "dist"
   ],
   "scripts": {
-    "lint": "npm run lint:main && npm run lint:module",
-    "lint:main": "tslint --type-check -p tsconfig.main.json",
-    "lint:module": "tslint --type-check -p tsconfig.module.json",
-    "clean": "rimraf dist",
-    "prebuild": "npm run clean",
-    "build": "npm run build:main && npm run build:module",
-    "build:main": "tsc -p tsconfig.main.json",
-    "build:module": "tsc -p tsconfig.module.json",
-    "prepublishOnly": "npm run lint && npm run clean && npm run build"
+    "prebuild:lib": "npm run clean:lib",
+    "prebuild:test": "npm run clean:test",
+    "pretest": "npm run lint && npm run build:test",
+    "prepublishOnly": "npm run test && npm run build:lib",
+    "clean:lib": "rimraf dist",
+    "clean:test": "rimraf test/dist",
+    "build:lib": "tsc -p tsconfig.main.json && tsc -p tsconfig.module.json",
+    "build:test": "tsc -p tsconfig.test.json",
+    "lint": "tslint --type-check -p tsconfig.main.json && tslint --type-check -p tsconfig.test.json",
+    "test": "ava test/dist/test"
   },
   "dependencies": {
     "apollo-fetch": "^0.5.0",
     "extract-files": "^2.0.0"
   },
   "devDependencies": {
+    "ava": "^0.21.0",
     "rimraf": "^2.5.4",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1"

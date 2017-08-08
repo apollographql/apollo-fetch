@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "test/dist",
+    "target": "es5",
+    "noUnusedLocals": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/src/**/*.ts"
+  ]
+}
