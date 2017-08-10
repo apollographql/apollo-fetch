@@ -30,13 +30,13 @@
     "test": "ava test/dist/test"
   },
   "dependencies": {
-    "apollo-fetch": "^0.5.0",
-    "extract-files": "^2.0.0"
+    "apollo-fetch": "^0.5.2",
+    "extract-files": "^2.0.1"
   },
   "devDependencies": {
     "ava": "^0.21.0",
     "rimraf": "^2.5.4",
-    "tslint": "^5.0.0",
+    "tslint": "^5.6.0",
     "typescript": "^2.2.1"
   }
 }
