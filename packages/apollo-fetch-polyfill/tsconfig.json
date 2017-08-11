@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.base",
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/__tests__/*.ts"]
+}

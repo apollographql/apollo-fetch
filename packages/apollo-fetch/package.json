@@ -42,15 +42,14 @@
     "prepublish": "npm run clean && npm run build",
     "prepublishOnly": "npm run clean && npm run build"
   },
-  "dependencies": {
-    "cross-fetch": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "4.0.8",
     "@types/chai-as-promised": "7.1.0",
     "@types/jest": "21.1.2",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
+    "cross-fetch": "1.1.1",
     "fetch-mock": "5.13.1",
     "graphql": "0.11.7",
     "graphql-tag": "2.6.0",

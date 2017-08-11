@@ -14,7 +14,6 @@ import {
   FetchError,
   BatchError,
 } from './types';
-import 'cross-fetch/polyfill';
 
 type WareStack =
   | MiddlewareInterface[]
@@ -56,7 +55,7 @@ export function constructDefaultOptions(
     headers: {
       Accept: '*/*',
       'Content-Type': 'application/json',
-      ...options.headers || [],
+      ...(options.headers || []),
     },
   };
 }
@@ -65,7 +64,9 @@ function throwHttpError(response, error) {
   let httpError;
   if (response && response.status >= 300) {
     httpError = new Error(
-      `Network request failed with status ${response.status} - "${response.statusText}"`,
+      `Network request failed with status ${response.status} - "${
+        response.statusText
+      }"`,
     );
   } else {
     httpError = new Error(`Network request failed to return valid JSON`);
@@ -85,6 +86,12 @@ function throwBatchError(response) {
 
 export function createApolloFetch(params: FetchOptions = {}): ApolloFetch {
   const { constructOptions, customFetch } = params;
+
+  if (typeof fetch !== 'function' && !customFetch) {
+    throw new Error(
+      'Global fetch API must be present or customFetch must be provided',
+    );
+  }
 
   const _uri = params.uri || '/graphql';
   const middlewares = [];
