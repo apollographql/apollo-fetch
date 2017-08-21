@@ -21,7 +21,7 @@
   },
   "pre-commit": "lint-staged",
   "devDependencies": {
-    "@types/chai": "4.0.2",
+    "@types/chai": "4.0.3",
     "@types/chai-as-promised": "0.0.31",
     "@types/fetch-mock": "5.8.3",
     "@types/mocha": "2.2.41",
@@ -39,7 +39,7 @@
     "prettier": "1.5.3",
     "rimraf": "2.6.1",
     "sinon": "3.0.0",
-    "source-map-support": "0.4.15",
+    "source-map-support": "0.4.16",
     "tslint": "5.5.0",
     "typescript": "2.4.2"
   },

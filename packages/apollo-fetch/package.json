@@ -48,7 +48,7 @@
     "isomorphic-fetch": "^2.2.1"
   },
   "devDependencies": {
-    "@types/chai": "4.0.2",
+    "@types/chai": "4.0.3",
     "@types/chai-as-promised": "0.0.31",
     "@types/mocha": "2.2.41",
     "chai": "4.1.1",
@@ -61,9 +61,9 @@
     "mocha": "3.5.0",
     "nyc": "11.1.0",
     "rimraf": "2.6.1",
-    "rollup": "0.46.1",
+    "rollup": "0.48.2",
     "sinon": "3.0.0",
-    "source-map-support": "0.4.15",
+    "source-map-support": "0.4.16",
     "tslint": "5.5.0",
     "typescript": "2.4.2"
   },
