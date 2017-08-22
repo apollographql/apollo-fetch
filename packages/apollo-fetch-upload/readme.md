@@ -61,7 +61,7 @@ See also the [setup instructions](https://github.com/jaydenseric/apollo-upload-s
 
 Use [`File`](https://developer.mozilla.org/en/docs/Web/API/File), [`FileList`](https://developer.mozilla.org/en/docs/Web/API/FileList) or [`ReactNativeFile`](#react-native) instances anywhere within mutation or query input variables. For server instructions see [`apollo-upload-server`](https://github.com/jaydenseric/apollo-upload-server). Checkout the [example API and client](https://github.com/jaydenseric/apollo-upload-examples).
 
-[`File`](https://developer.mozilla.org/en/docs/Web/API/File) example:
+### [`File`](https://developer.mozilla.org/en/docs/Web/API/File) example
 
 ```jsx
 import { graphql, gql } from 'react-apollo'
@@ -87,7 +87,7 @@ export default graphql(gql`
 `)(UploadFile)
 ```
 
-[`FileList`](https://developer.mozilla.org/en/docs/Web/API/FileList) example:
+### [`FileList`](https://developer.mozilla.org/en/docs/Web/API/FileList) example
 
 ```jsx
 import { graphql, gql } from 'react-apollo'
@@ -113,7 +113,9 @@ export default graphql(gql`
 `)(UploadFiles)
 ```
 
-For React Native, substitute [`File`](https://developer.mozilla.org/en/docs/Web/API/File) with `ReactNativeFile` from [`extract-files`](https://github.com/jaydenseric/extract-files):
+### React Native
+
+Substitute [`File`](https://developer.mozilla.org/en/docs/Web/API/File) with `ReactNativeFile` from [`extract-files`](https://github.com/jaydenseric/extract-files):
 
 ```js
 import { ReactNativeFile } from 'apollo-fetch-upload'
