@@ -48,7 +48,7 @@
     "isomorphic-fetch": "^2.2.1"
   },
   "devDependencies": {
-    "@types/chai": "4.0.3",
+    "@types/chai": "4.0.4",
     "@types/chai-as-promised": "0.0.31",
     "@types/mocha": "2.2.41",
     "chai": "4.1.1",
