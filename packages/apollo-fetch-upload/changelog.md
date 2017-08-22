@@ -1,6 +1,6 @@
 # apollo-fetch-upload change log
 
-## next
+## 1.1.0
 
 - Updated `apollo-fetch` dependency.
 - Added several subheadings to the readme, fixing some broken links.

@@ -1,6 +1,6 @@
 {
   "name": "apollo-fetch-upload",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Allows files to be used in GraphQL requests with apollo-fetch.",
   "license": "MIT",
   "author": "Jayden Seric <me@jaydenseric.com>",
