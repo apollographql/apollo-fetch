@@ -56,7 +56,7 @@
     "fetch-mock": "5.12.2",
     "graphql": "0.10.5",
     "graphql-tag": "2.4.2",
-    "lerna": "2.0.0",
+    "lerna": "2.1.2",
     "lodash": "4.17.4",
     "mocha": "3.5.0",
     "nyc": "11.1.0",
@@ -64,7 +64,7 @@
     "rollup": "0.48.2",
     "sinon": "3.2.1",
     "source-map-support": "0.4.16",
-    "tslint": "5.6.0",
+    "tslint": "5.7.0",
     "typescript": "2.4.2"
   },
   "nyc": {
