@@ -32,7 +32,7 @@ To execute the fetch function, call `apolloFetch` directly in the following way:
 ```js
 apolloFetch({ query, variables, operationName }) //all apolloFetch arguments are optional
   .then(result => {
-    const { data, error, extensions } = result;
+    const { data, errors, extensions } = result;
     //GraphQL errors and extensions are optional
   })
   .catch(error => {
