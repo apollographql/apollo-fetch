@@ -14,7 +14,11 @@ import {
   FetchError,
   BatchError,
 } from './types';
-import 'isomorphic-fetch';
+import * as fetchPonyfill_ from 'fetch-ponyfill';
+// Trick rollup, see:
+// https://github.com/rollup/rollup/issues/670#issuecomment-284621537
+const fetchPonyfill = fetchPonyfill_;
+const { fetch } = fetchPonyfill();
 
 type WareStack =
   | MiddlewareInterface[]

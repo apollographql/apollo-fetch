@@ -5,6 +5,8 @@
     "rootDir": "."
   },
   "include": [
+    "fetch-mock.typings.d.ts",
+    "fetch-ponyfill.typings.d.ts",
     "src/**/*.ts",
     "tests/**/*.ts"
   ]

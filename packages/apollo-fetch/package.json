@@ -45,7 +45,7 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1"
+    "fetch-ponyfill": "^4.1.0"
   },
   "devDependencies": {
     "@types/chai": "4.0.4",
