@@ -14,7 +14,7 @@ import {
   FetchError,
   BatchError,
 } from './types';
-import 'isomorphic-fetch';
+import 'cross-fetch/polyfill';
 
 type WareStack =
   | MiddlewareInterface[]
