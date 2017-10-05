@@ -6,9 +6,10 @@
     "url": "git+https://github.com/apollographql/apollo-fetch.git"
   },
   "scripts": {
-    "bootstrap": "npm i && lerna bootstrap",
+    "bootstrap": "npm i && lerna bootstrap && lerna run -- build",
     "test": "lerna run -- test",
-    "lint-fix": "prettier --trailing-comma all --single-quote --write \"packages/*/{src,tests,benchmark}/**/*.{j,t}s*\"",
+    "lint-fix":
+      "prettier --trailing-comma all --single-quote --write \"packages/*/{src,tests,benchmark}/**/*.{j,t}s*\"",
     "lint-staged": "lint-staged",
     "coverage": "nyc --reporter=lcov lerna run -- coverage:test"
   },

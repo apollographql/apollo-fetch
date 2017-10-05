@@ -15,6 +15,7 @@ In order to include your fetch in the repository's coverage, include a `coverage
 
 A couple of useful commands that you will want to run in the root of the repository during your development are:
 
+* `npm run bootstrap`: installs all dependencies in packages, symlinks shared dependencies, and builds modules
 * `lerna bootstrap`: installs all dependencies in packages and symlinks shared dependencies
 * `lerna run test`: tests all projects in the lerna project
 * `npm run coverage`: runs coverage for all lerna packages, depends on each module to have a `coverage:test` script.

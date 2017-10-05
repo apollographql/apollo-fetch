@@ -17,7 +17,7 @@ before_install:
   - lerna run -- prune
 
 install:
-  - lerna bootstrap
+  - npm run bootstrap
 
 script:
   - npm test
