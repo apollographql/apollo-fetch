@@ -49,7 +49,7 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1"
+    "cross-fetch": "^1.0.0"
   },
   "devDependencies": {
     "@types/chai": "4.0.4",
