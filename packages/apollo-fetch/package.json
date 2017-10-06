@@ -16,7 +16,8 @@
   "typings": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch"
+    "url":
+      "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch"
   },
   "bugs": {
     "url": "https://github.com/apollographql/apollo-fetch/issues"
@@ -27,19 +28,22 @@
     "test": "npm run test-only --",
     "posttest": "npm run lint",
     "test-only": "mocha --reporter spec --full-trace dist/tests/tests.js",
-    "test-watch": "mocha --reporter spec --full-trace dist/tests/tests.js --watch",
+    "test-watch":
+      "mocha --reporter spec --full-trace dist/tests/tests.js --watch",
     "coverage:test": "_mocha --reporter dot --full-trace dist/tests/tests.js",
     "coverage": "nyc --reporter=lcov npm run coverage:test",
-    "lint": "tslint --type-check -p tsconfig.test.json src/*.ts && tslint --type-check -p tsconfig.test.json tests/*.ts",
+    "lint":
+      "tslint --type-check -p tsconfig.test.json src/*.ts && tslint --type-check -p tsconfig.test.json tests/*.ts",
     "prebuild": "npm run clean:dist",
-    "prebuild-test": "npm run clean:dist",
+    "prebuild-test": "npm run clean:test",
     "build": "tsc",
-    "build-test": "tsc -p tsconfig.test.json",
+    "build-test": "npm run build && tsc -p tsconfig.test.json",
     "postbuild": "npm run bundle",
     "bundle": "rollup -c",
     "watch": "tsc -w",
     "clean": "npm run clean:dist && npm run clean:coverage",
     "clean:dist": "rimraf dist/*",
+    "clean:test": "rimraf dist/src && rimraf dist/tests ",
     "clean:coverage": "rimraf coverage/*",
     "prepublish": "npm run clean && npm run build",
     "prepublishOnly": "npm run clean && npm run build"

@@ -1,32 +1,33 @@
 {
   "name": "apollo-fetch-upload",
   "version": "1.1.0",
-  "description": "Allows files to be used in GraphQL requests with apollo-fetch.",
+  "description":
+    "Allows files to be used in GraphQL requests with apollo-fetch.",
   "license": "MIT",
   "author": "Jayden Seric <me@jaydenseric.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch-upload"
+    "url":
+      "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch-upload"
   },
   "homepage": "https://github.com/apollographql/apollo-fetch#readme",
   "bugs": "https://github.com/apollographql/apollo-fetch/issues",
   "types": "./dist/main/index.d.ts",
   "main": "./dist/main/index.js",
   "module": "./dist/module/index.js",
-  "files": [
-    "src",
-    "dist"
-  ],
+  "files": ["src", "dist"],
   "scripts": {
     "prebuild:lib": "npm run clean:lib",
     "prebuild:test": "npm run clean:test",
     "pretest": "npm run lint && npm run build:test",
     "prepublishOnly": "npm run test && npm run build:lib",
+    "clean": "npm run clean:lib && npm run clean:test",
     "clean:lib": "rimraf dist",
     "clean:test": "rimraf test/dist",
     "build:lib": "tsc -p tsconfig.main.json && tsc -p tsconfig.module.json",
     "build:test": "tsc -p tsconfig.test.json",
-    "lint": "tslint --type-check -p tsconfig.main.json && tslint --type-check -p tsconfig.test.json",
+    "lint":
+      "tslint --type-check -p tsconfig.main.json && tslint --type-check -p tsconfig.test.json",
     "test": "ava test/dist/test"
   },
   "dependencies": {
