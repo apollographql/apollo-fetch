@@ -57,7 +57,7 @@
     "@types/mocha": "2.2.42",
     "chai": "4.1.1",
     "chai-as-promised": "7.1.1",
-    "fetch-mock": "5.13.0",
+    "fetch-mock": "5.13.1",
     "graphql": "0.10.5",
     "graphql-tag": "2.4.2",
     "lerna": "2.1.2",
