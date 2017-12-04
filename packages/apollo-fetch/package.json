@@ -52,7 +52,7 @@
     "isomorphic-fetch": "^2.2.1"
   },
   "devDependencies": {
-    "@types/chai": "4.0.4",
+    "@types/chai": "4.0.8",
     "@types/chai-as-promised": "0.0.31",
     "@types/mocha": "2.2.42",
     "chai": "4.1.1",
