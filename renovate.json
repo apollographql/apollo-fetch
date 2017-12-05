@@ -1,4 +1,11 @@
 {
   "pinVersions": true,
-  "depTypes": [{"depType": "dependencies", "pinVersions": false}]
+  "semanticCommits": true,
+  "depTypes": [{ "depType": "dependencies", "pinVersions": false }],
+  "timezone": "America/Los_Angeles",
+  "rebaseStalePrs": true,
+  "prCreation": "not-pending",
+  "automerge": "minor",
+  "assignees": ["@evans"],
+  "reviewers": ["@evans"]
 }
