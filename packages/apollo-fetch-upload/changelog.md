@@ -1,5 +1,11 @@
 # apollo-fetch-upload change log
 
+## next
+
+## 1.2.0
+
+- Updated `apollo-fetch` dependency, which uses `cross-fetch`
+
 ## 1.1.0
 
 - Updated `apollo-fetch` dependency.

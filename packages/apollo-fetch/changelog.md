@@ -2,6 +2,9 @@
 
 ## next
 
+## 0.7.0
+
+- Switch to `cross-fetch` for react native functionality [PR #71](https://github.com/apollographql/apollo-fetch/pull/71)
 - Change log moved into the published package. [PR #16](https://github.com/apollographql/apollo-fetch/pull/16)
 
 ## 0.6.0
