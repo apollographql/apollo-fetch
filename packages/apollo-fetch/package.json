@@ -33,7 +33,7 @@
     "coverage:test": "_mocha --reporter dot --full-trace dist/tests/tests.js",
     "coverage": "nyc --reporter=lcov npm run coverage:test",
     "lint":
-      "tslint --type-check -p tsconfig.test.json src/*.ts && tslint --type-check -p tsconfig.test.json tests/*.ts",
+      "tslint -p tsconfig.test.json src/*.ts && tslint -p tsconfig.test.json tests/*.ts",
     "prebuild": "npm run clean:dist",
     "prebuild-test": "npm run clean:test",
     "build": "tsc",

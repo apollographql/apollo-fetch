@@ -4,16 +4,17 @@ import { constructUploadOptions } from '../../src/index.js';
 
 const mockRequestWithoutFiles = {
   operationName: 'withoutFiles',
-  query: 'query withoutFiles(foo: Boolean!) { withoutFiles(foo: $foo) { bar } }',
+  query:
+    'query withoutFiles(foo: Boolean!) { withoutFiles(foo: $foo) { bar } }',
   variables: {
     foo: true,
   },
 };
 
-const mockFetchOptions = {
-  headers: {
-    foo: true,
-  },
+const mockFetchOptions: RequestInit = {
+  headers: new Headers({
+    foo: 'true',
+  }),
 };
 
 test('constructUploadOptions without files reverts to constructDefaultOptions', t => {
