@@ -1,6 +1,6 @@
 {
   "name": "apollo-fetch-upload",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description":
     "Allows files to be used in GraphQL requests with apollo-fetch.",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "test": "ava test/dist/test"
   },
   "dependencies": {
-    "apollo-fetch": "^0.6.0",
+    "apollo-fetch": "^0.7.0",
     "extract-files": "^2.0.1"
   },
   "devDependencies": {
