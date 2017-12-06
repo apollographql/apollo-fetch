@@ -26,8 +26,7 @@
     "clean:test": "rimraf test/dist",
     "build:lib": "tsc -p tsconfig.main.json && tsc -p tsconfig.module.json",
     "build:test": "tsc -p tsconfig.test.json",
-    "lint":
-      "tslint --type-check -p tsconfig.main.json && tslint --type-check -p tsconfig.test.json",
+    "lint": "tslint -p tsconfig.main.json && tslint -p tsconfig.test.json",
     "test": "ava test/dist/test"
   },
   "dependencies": {
