@@ -22,7 +22,7 @@
   },
   "pre-commit": "lint-staged",
   "devDependencies": {
-    "@types/chai": "4.0.8",
+    "@types/chai": "4.0.10",
     "@types/chai-as-promised": "7.1.0",
     "@types/fetch-mock": "5.12.2",
     "@types/mocha": "2.2.44",
