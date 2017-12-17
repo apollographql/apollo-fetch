@@ -3,7 +3,9 @@
 
 `apollo-fetch` is a lightweight client for GraphQL requests that supports middleware and afterware that modify requests and responses.
 
-By default `apollo-fetch` uses `cross-fetch`, but you have the option of using a custom fetch function.
+By default `apollo-fetch` expects the [fetch API](https://developer.mozilla.org/en/docs/Web/API/Fetch_API) to be present in the global scope, but you have the option of using a custom fetch function.
+
+There is a convenience wrapper module `apollo-fetch-polyfill` which comes with the `cross-fetch` polyfill for environments where the fetch API is not present.
 
 If you are interested in contributing, please read the [documentation on repository structure](docs/monorepo.md) and [Contributor Guide](CONTRIBUTING.md).
 
@@ -290,7 +292,7 @@ FetchOptions {
 /*
  * defaults:
  * uri = '/graphql'
- * customFetch = fetch from cross-fetch
+ * customFetch = fetch from global scope
  * constructOptions = constructDefaultOptions(exported from apollo-fetch)
  */
 ```

@@ -1,5 +1,5 @@
 import test from 'ava';
-import { constructDefaultOptions } from 'apollo-fetch';
+import { constructDefaultOptions } from 'apollo-fetch-polyfill';
 import { constructUploadOptions } from '../../src/index.js';
 
 const mockRequestWithoutFiles = {

@@ -2,6 +2,9 @@
 
 ## next
 
+- Run tests with jest instead of mocha
+- Remove polyfill and introduce separate `apollo-fetch-polyfill` package.
+
 ## 0.7.0
 
 - Switch to `cross-fetch` for react native functionality [PR #71](https://github.com/apollographql/apollo-fetch/pull/71)

@@ -1,0 +1,54 @@
+{
+  "name": "apollo-fetch-polyfill",
+  "version": "1.0.0",
+  "description":
+    "Wrapper around apollo-fetch which includes the cross-fetch polyfill",
+  "author": "Christoph Tavan <dev@tavan.de>",
+  "license": "MIT",
+  "main": "./dist/bundle.umd.js",
+  "module": "./dist/index.js",
+  "jsnext:main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url":
+      "https://github.com/apollographql/apollo-fetch/tree/master/packages/apollo-fetch-polyfill"
+  },
+  "bugs": {
+    "url": "https://github.com/apollographql/apollo-fetch/issues"
+  },
+  "homepage": "https://github.com/apollographql/apollo-fetch#readme",
+  "scripts": {
+    "pretest": "npm run lint",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "postbuild": "npm run bundle",
+    "bundle": "rollup -c",
+    "lint":
+      "tslint -p tsconfig.json src/*.ts && tslint -p tsconfig.test.json src/__tests__/*.ts",
+    "test": "jest",
+    "prepublish": "npm run clean && npm run build",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "apollo-fetch": "0.7.0",
+    "cross-fetch": "1.1.1"
+  },
+  "devDependencies": {
+    "@types/jest": "21.1.2",
+    "jest": "21.2.1",
+    "rimraf": "2.6.1",
+    "rollup": "0.48.2",
+    "ts-jest": "21.1.0",
+    "tslint": "5.7.0",
+    "typescript": "2.4.2"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": ["ts", "tsx", "js", "json"]
+  }
+}

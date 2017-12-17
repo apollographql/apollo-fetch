@@ -30,7 +30,7 @@
     "test": "ava test/dist/test"
   },
   "dependencies": {
-    "apollo-fetch": "^0.7.0",
+    "apollo-fetch-polyfill": "^1.0.0",
     "extract-files": "^2.0.1"
   },
   "devDependencies": {

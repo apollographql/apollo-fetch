@@ -1,3 +1,4 @@
+import 'cross-fetch/polyfill';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
@@ -5,11 +6,8 @@ import { isEqual } from 'lodash';
 import gql from 'graphql-tag';
 import { print } from 'graphql';
 import * as fetchMock from 'fetch-mock';
-import {
-  createApolloFetch,
-  constructDefaultOptions,
-} from '../src/apollo-fetch';
-import { RequestAndOptions, FetchResult } from '../src/types';
+import { createApolloFetch, constructDefaultOptions } from '../apollo-fetch';
+import { RequestAndOptions, FetchResult } from '../types';
 
 chai.use(chaiAsPromised);
 
@@ -140,7 +138,7 @@ describe('apollo-fetch', () => {
 
     const mockError = { throws: new TypeError('mock me') };
 
-    before(() => {
+    beforeEach(() => {
       fetchMock.post('/graphql', data);
       fetchMock.post('alternate', alternateData);
       fetchMock.post('/raw', unparsableData);
@@ -161,7 +159,7 @@ describe('apollo-fetch', () => {
 
     afterEach(fetchMock.reset);
 
-    after(fetchMock.restore);
+    afterEach(fetchMock.restore);
 
     it('should not throw with no arguments', () => {
       assert.doesNotThrow(createApolloFetch);
@@ -267,12 +265,12 @@ describe('apollo-fetch', () => {
   });
 
   describe('middleware', () => {
-    before(() => {
+    beforeEach(() => {
       fetchMock.post(swapiUrl, swapiResolver);
     });
 
     afterEach(fetchMock.reset);
-    after(fetchMock.restore);
+    afterEach(fetchMock.restore);
 
     it('should throw an error if middleware is not a function', () => {
       const malWare: any = {};
@@ -399,13 +397,13 @@ describe('apollo-fetch', () => {
   });
 
   describe('afterware', () => {
-    before(() => {
+    beforeEach(() => {
       fetchMock.post(swapiUrl, swapiResolver);
       fetchMock.post(forbiddenUrl, 403);
     });
 
     afterEach(fetchMock.reset);
-    after(fetchMock.restore);
+    afterEach(fetchMock.restore);
 
     it('should return errors thrown in afterwares', () => {
       const apolloFetch = createApolloFetch({ uri: swapiUrl });
@@ -497,12 +495,12 @@ describe('apollo-fetch', () => {
   });
 
   describe('multiple requests', () => {
-    before(() => {
+    beforeEach(() => {
       fetchMock.post(swapiUrl, swapiResolver);
     });
 
     afterEach(fetchMock.reset);
-    after(fetchMock.restore);
+    afterEach(fetchMock.restore);
 
     it('handle multiple middlewares', () => {
       const testWare1 = TestWare([{ key: 'personNum', val: 1 }]);
@@ -611,7 +609,7 @@ describe('apollo-fetch', () => {
     const data = { data: { hello: 'world', uri: '/graphql' } };
     const batch = [data, data];
 
-    before(() => {
+    beforeEach(() => {
       fetchMock.post('batch', batch);
       fetchMock.post('failed batch', data);
     });
@@ -717,13 +715,13 @@ describe('apollo-fetch', () => {
     const batch = [data, data];
     const operations = [simpleQueryWithNoVars, simpleQueryWithNoVars];
 
-    before(() => {
+    beforeEach(() => {
       fetchMock.post('batch', batch);
       fetchMock.post('401', 401);
     });
 
     afterEach(fetchMock.reset);
-    after(fetchMock.restore);
+    afterEach(fetchMock.restore);
 
     it('should throw an error if not a function', () => {
       assert.throws(() => createApolloFetch().batchUseAfter(<any>{}));
