@@ -60,7 +60,7 @@
     "fetch-mock": "5.13.1",
     "graphql": "0.13.2",
     "graphql-tag": "2.8.0",
-    "lerna": "2.9.0",
+    "lerna": "2.9.1",
     "lodash": "4.17.5",
     "mocha": "4.1.0",
     "nyc": "11.6.0",
