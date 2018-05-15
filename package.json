@@ -35,7 +35,7 @@
     "lint-staged": "6.1.1",
     "lodash": "4.17.10",
     "mocha": "4.1.0",
-    "nyc": "11.7.3",
+    "nyc": "11.8.0",
     "pre-commit": "1.2.2",
     "prettier": "1.12.1",
     "rimraf": "2.6.2",
