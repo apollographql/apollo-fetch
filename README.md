@@ -147,6 +147,8 @@ const apolloFetch = createApolloFetch({ uri });
 apolloFetch({ query, variables }).then(...).catch(...);
 ```
 
+Note that apollo-fetch does not support `gql` from the graphql-tag library. Leave `gql` out when writing queries that are used with apollo-fetch, or use `print` from the graphql library to stringify the query.
+
 ### Middleware
 
 A GraphQL mutation with authentication middleware.
