@@ -1,3 +1,9 @@
+# DEPRECATED
+
+Apollo Client 2.0 no longer uses `apollo-fetch` but [`apollo-link`](https://github.com/apollographql/apollo-link) instead. See https://www.apollographql.com/docs/react/2.0-migration.html for an example.
+
+[This module is deprecated and will not receive further updates.](https://github.com/apollographql/apollo-fetch/issues/80)
+
 # apollo-fetch [![npm version](https://badge.fury.io/js/apollo-fetch.svg)](https://badge.fury.io/js/apollo-fetch) [![Get on Slack](https://img.shields.io/badge/slack-join-orange.svg)](http://www.apollostack.com/#slack)
 
 
