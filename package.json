@@ -37,7 +37,7 @@
     "mocha": "4.1.0",
     "nyc": "11.9.0",
     "pre-commit": "1.2.2",
-    "prettier": "1.13.5",
+    "prettier": "1.13.6",
     "rimraf": "2.6.2",
     "sinon": "4.5.0",
     "source-map-support": "0.5.6",
