@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "apollo-fetch": "^0.7.0",
-    "extract-files": "^2.0.1"
+    "extract-files": "^3.0.0"
   },
   "devDependencies": {
     "ava": "0.25.0",
