@@ -67,7 +67,7 @@
     "rimraf": "2.6.2",
     "rollup": "0.64.1",
     "sinon": "4.5.0",
-    "source-map-support": "0.5.8",
+    "source-map-support": "0.5.9",
     "tslint": "5.10.0",
     "typescript": "2.6.2"
   },
