@@ -65,7 +65,7 @@
     "mocha": "4.1.0",
     "nyc": "11.9.0",
     "rimraf": "2.6.2",
-    "rollup": "0.66.4",
+    "rollup": "0.66.5",
     "sinon": "4.5.0",
     "source-map-support": "0.5.9",
     "tslint": "5.10.0",
