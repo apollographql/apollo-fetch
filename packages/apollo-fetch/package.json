@@ -54,7 +54,7 @@
   "devDependencies": {
     "@types/chai": "4.1.6",
     "@types/chai-as-promised": "7.1.0",
-    "@types/mocha": "2.2.48",
+    "@types/mocha": "5.2.5",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "fetch-mock": "5.13.1",
@@ -62,7 +62,7 @@
     "graphql-tag": "2.10.0",
     "lerna": "2.11.0",
     "lodash": "4.17.11",
-    "mocha": "4.1.0",
+    "mocha": "5.2.0",
     "nyc": "11.9.0",
     "rimraf": "2.6.2",
     "rollup": "0.66.6",
