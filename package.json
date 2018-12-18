@@ -24,7 +24,7 @@
   "devDependencies": {
     "@types/chai": "4.1.7",
     "@types/chai-as-promised": "7.1.0",
-    "@types/fetch-mock": "5.12.2",
+    "@types/fetch-mock": "6.0.5",
     "@types/mocha": "2.2.48",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
