@@ -59,7 +59,7 @@
     "chai-as-promised": "7.1.1",
     "fetch-mock": "5.13.1",
     "graphql": "0.13.2",
-    "graphql-tag": "2.10.0",
+    "graphql-tag": "2.10.1",
     "lerna": "2.11.0",
     "lodash": "4.17.11",
     "mocha": "4.1.0",
