@@ -34,7 +34,7 @@
     "extract-files": "^2.0.1"
   },
   "devDependencies": {
-    "ava": "0.25.0",
+    "ava": "1.4.1",
     "rimraf": "2.6.2",
     "tslint": "5.10.0",
     "typescript": "2.6.2"
