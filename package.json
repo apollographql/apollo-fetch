@@ -41,7 +41,7 @@
     "rimraf": "2.6.2",
     "sinon": "4.5.0",
     "source-map-support": "0.5.9",
-    "tslint": "5.10.0",
+    "tslint": "5.17.0",
     "typescript": "2.6.2"
   },
   "nyc": {
