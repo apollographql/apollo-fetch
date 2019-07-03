@@ -180,7 +180,7 @@ apolloFetch(...).then(...).catch(...);
 ### Afterware
 
 Afterware to check the response status and logout on a 401.
-The afterware has access to the raw reponse always and parsed response when the data is proper JSON.
+The afterware has access to the raw response always and parsed response when the data is proper JSON.
 
 ```js
 import { createApolloFetch } from 'apollo-fetch';
